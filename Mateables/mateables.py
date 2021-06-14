@@ -94,3 +94,6 @@ class Triangle(Polygon):
         self.point1 = point1
         self.point2 = point2 
         self.point3 = point3
+
+test_polygon = Polygon(Point(1, 2), Point(2, 3), Point(3, 4))
+print(test_polygon)
