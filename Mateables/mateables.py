@@ -1,35 +1,43 @@
 from math import sqrt, pi, sin, cos, atan
+from typing import Union
 
-from point import Point
+import moderngl
+
+from ..utils.useful_functions import * #this is for easy access to rotate
+from ..utils.standard_imports import *
 
 
-class Matable() :
-    """Short for Animatable Object, a Matable is designed to hold points and instructions on how to connect them."""
-    def __init__(self, *points) : 
-        self.points = (*points,)        
+class Matable():
+    """Short for Animatable Object, a Matable is designed to hold points, which are tuples of coordinate pairs and instructions on how to connect them.
+    For simple reference, point[0] will always mean an x-value of a point, and point[1] will always mean the y-value."""
+    def __init__(self, *points: Union[tuple, list]): 
+        temp_list = []
+        for point in points:
+            temp_list.append(point)
+        self.points = tuple(temp_list) #tuples require less memory overall.
     
-    def rotate(self, degrees, center, rotates_clockwise = True) : 
-        for point in self.points : 
-            point.rotate(self, degrees, center, rotates_clockwise)
+    def draw(self, ctx: moderngl.context): 
+        """*VERY* important. Every Matable must override draw, as it is central to rendering in Synthesium.
+        Draw takes in a moderngl context and then applies """
+        pass
+
+    #GENERAL FUNCTIONS DEALING WITH MOVEMENT
+    def rotate(self, degrees, center, rotates_clockwise = True): 
+        for point in self.points: 
+            rotate(point, degrees, center, rotates_clockwise) #check utils.useful_functions for the whole breakdown.
             
-    def shift(self, amt: tuple) : 
-        for point in self.points : 
-            point = point.shift(amt)
-        self = Matable(*self.points)
-        return self
-            
-    def __init__(self, x, y) : 
-        self.x = x
-        self.y = y
-        self.coords = (x,y)
-
-
-class Bezier(Matable) : 
-    pass #to be implemented later
-
+    def shift(self, amt: tuple):
+        """Shifts are done by adding a tuple of length 4, with each value corresponding to right, left, up, and down movement."""
+        new_point_list = [] #temp list to hold new points
+        for point in self.points: 
+            new_x_value = point[0] + amt[0] - amt[1] #calculate shifted x-coord
+            new_y_value = point[1] + amt[2] - amt[3] #calculate shifted y-coord
+            new_point_list.append(tuple(new_x_value, new_y_value))
+        self.points = tuple(new_point_list)
+    
 class Line(Matable) : 
     """A class made for straight lines going between two Points."""
-    def __init__(self, bound1 : Point, bound2 : Point) : 
+    def __init__(self, bound1: tuple, bound2: tuple) : 
         self.bound1 = bound1
         self.bound2 = bound2
     
@@ -45,13 +53,14 @@ class Line(Matable) :
         
     def get_bound2(self) : 
         return self.bound2
+
+class Bezier(Line): 
+    pass #to be implemented later
     
 class Polygon(Matable) : 
     """Base class for Polygons, as the name suggests."""
-    def __init__(self, *points) : 
-        self.num_points = len(points)
-        self.points = {f"{i}": point for i, point in enumerate(points)} #dictionary comprehension is SO powerful, it's frightening.
-        self.vertices = {f"{i}": point.get_coords() for i, point in enumerate(points)} #self.vertices is for a quick way to access the raw coodinates, not Point objects.
+    def __init__(self, *points: Union[tuple, list]): 
+        super().__init__(points)
     
     def get_num_points(self) : 
         return len(self.points)
@@ -66,7 +75,7 @@ class Polygon(Matable) :
         return string
     
     def __repr__(self) : 
-        return f"Polygon of type {type(self)}, {str(self)}"
+        return f"{type(self)}(*self.points)"
         
     def shift(self, amt: tuple) : 
         for point in self.points : 
@@ -75,25 +84,25 @@ class Polygon(Matable) :
         self = Polygon(*self.points)
         return self
        
-        
-    
 class Quadrilateral(Polygon) :
     """Class for any Quadrilaterals, inheriting from Polygon."""
     def __init__(self, point1, point2, point3, point4) : 
         super().__init__(point1, point2, point3, point4)
+
+class Triangle(Polygon): 
+    """I would think the name is self-explanatory."""
+    def __init__(self, point1, point2, point3): 
+        super().__init__(point1, point2, point3)
 
 class Circle(Matable) : 
     def __init__(self, center, radius) : 
         self.center = center
         self.radius = radius
         self.circumference = pi * (radius **2) 
+    
+    def shift(self, amt: tuple):
+        self.center.shift(amt)
 
-class Triangle(Polygon): 
-    def __init__(self, point1, point2, point3): 
-        self.points = (point1, point2, point3)
-        self.point1 = point1
-        self.point2 = point2 
-        self.point3 = point3
 
-test_polygon = Polygon(Point(1, 2), Point(2, 3), Point(3, 4))
-print(test_polygon)
+p = Matable((0,0), (0, 1), (1, 0))
+print(p)
