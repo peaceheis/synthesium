@@ -17,7 +17,7 @@ class Matable():
     
     def draw(self, ctx: moderngl.context): 
         """*VERY* important. Every Matable must override draw, as it is central to rendering in Synthesium.
-        Draw takes in a moderngl context and then applies """
+        Draw takes in a moderngl context and then the Matable paints itself on the context."""
         pass
 
     #GENERAL FUNCTIONS DEALING WITH MOVEMENT
