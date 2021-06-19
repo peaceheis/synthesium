@@ -1,10 +1,9 @@
 from math import sqrt, pi, sin, cos, atan
-from typing import Union
 
 import moderngl
 
 from ..utils.useful_functions import * #this is for easy access to rotate
-from ..utils.standard_imports import *
+from ..utils.standard_imports import * #Union, Any from typing
 
 
 class Matable():
@@ -36,7 +35,7 @@ class Matable():
         self.points = tuple(new_point_list)
     
 class Line(Matable) : 
-    """A class made for straight lines going between two Points."""
+    """A class made for straight lines going between two points."""
     def __init__(self, bound1: tuple, bound2: tuple) : 
         self.bound1 = bound1
         self.bound2 = bound2
@@ -95,14 +94,25 @@ class Triangle(Polygon):
         super().__init__(point1, point2, point3)
 
 class Circle(Matable) : 
-    def __init__(self, center, radius) : 
+    def __init__(self, center: tuple, radius: tuple): 
         self.center = center
         self.radius = radius
         self.circumference = pi * (radius **2) 
     
     def shift(self, amt: tuple):
-        self.center.shift(amt)
+        center = self.center
+        new_x_value = center[0] + amt[0] - amt[1]
+        new_y_value = center[1] + amt[2] - amt[3]
+        return Circle(tuple(new_x_value, new_y_value), self.radius)
 
+    def get_center(self) -> tuple: 
+        return self.center
+    
+    def set_center(self, center: tuple): 
+        return Circle(center, self.radius)
 
-p = Matable((0,0), (0, 1), (1, 0))
-print(p)
+    def get_radius(self) -> Union[int, float]: 
+        return self.radius 
+
+    def set_radius(self, radius: Union[int, float]): 
+        return Circle(self.center, radius)
