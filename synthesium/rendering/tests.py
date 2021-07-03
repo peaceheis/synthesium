@@ -1,41 +1,41 @@
-import struct
 import moderngl
+import moderngl_window as mglw
 
-ctx = moderngl.create_context(standalone=True)
+ctx = moderngl.create_standalone_context(require=410)
 
-program = ctx.program(
-    vertex_shader="""
-    #version 330
 
-    // Output values for the shader. They end up in the buffer.
-    out float value;
-    out float product;
+prog = ctx.program(
+    vertex_shader='''
+        #version 410
 
-    void main() {
-        // Implicit type conversion from int to float will happen here
-        value = gl_VertexID;
-        product = gl_VertexID * gl_VertexID;
-    }
-    """,
-    # What out varyings to capture in our buffer!
-    varyings=["value", "product"],
+        in vec2 in_vert;
+        in vec3 in_color;
+
+        out vec3 v_color;
+
+        void main() {
+            v_color = in_color;
+            gl_Position = vec4(in_vert, 0.0, 1.0);
+        }
+    ''',
+    fragment_shader='''
+        #version 410
+
+        in vec3 v_color;
+
+        out vec3 f_color;
+
+        void main() {
+            f_color = v_color;
+        }
+    ''',
 )
 
-NUM_VERTICES = 10
+class Test(mglw.WindowConfig):
+    gl_version = (3, 3)
 
-# We always need a vertex array in order to execute a shader program.
-# Our shader doesn't have any buffer inputs, so we give it an empty array.
-vao = ctx.vertex_array(program, [])
+    def render(self, time, frametime):
+        self.ctx.clear(1.0, 0.0, 0.0, 0.0)
+    
 
-# Create a buffer allocating room for 20 32 bit floats
-buffer = ctx.buffer(reserve=NUM_VERTICES * 8)
-
-# Start a transform with buffer as the destination.
-# We force the vertex shader to run 10 times
-vao.transform(buffer, vertices=NUM_VERTICES)
-
-# Unpack the 20 float values from the buffer (copy from graphics memory to system memory).
-# Reading from the buffer will cause a sync (the python program stalls until the shader is done)
-data = struct.unpack("20f", buffer.read())
-for i in range(0, 20, 2):
-    print(f"value = {data[i]}, product = {data[i+1]}")
+Test.run()
