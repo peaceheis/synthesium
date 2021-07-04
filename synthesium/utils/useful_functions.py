@@ -1,4 +1,6 @@
-    from math import sqrt
+from math import sqrt
+
+#useful Matable functions
 def calculate_distance(point1: tuple, point2: tuple): 
         """distance formula, calculated from two coordinate pair tuples"""
         return sqrt((point1[0] - point1[1])**2 + (point2[0] - point2[1])**2)
@@ -44,3 +46,13 @@ def rotate(point: tuple, degrees: int, center: tuple, rotates_clockwise: bool = 
     #shift back from center being origin to original location
     point[0] += center[0]
     point[1] += center[1]
+
+#TODO, write some rate_funcs
+
+def constant(progress: tuple): 
+    return 1
+
+def linear_increase(progress: tuple): 
+    return progress[0]/progress[1]
+
+ 

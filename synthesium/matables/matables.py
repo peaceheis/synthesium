@@ -33,8 +33,12 @@ class Matable():
             new_y_value = point[1] + amt[2] - amt[3] #calculate shifted y-coord
             new_point_list.append(tuple(new_x_value, new_y_value))
         self.points = tuple(new_point_list)
-    
-class Line(Matable) : 
+
+class Curve(Matable): 
+    def __init__(self, *bounds: "tuple[tuple]"): 
+        self.bounds = {f"bound{i}":bound for i, bound in enumerate(bounds)} #TODO, enable some interesting Curve functionality
+
+class Line(Curve) : 
     """A class made for straight lines going between two points."""
     def __init__(self, bound1: tuple, bound2: tuple) : 
         self.bound1 = bound1
@@ -53,8 +57,6 @@ class Line(Matable) :
     def get_bound2(self) : 
         return self.bound2
 
-class Bezier(Line): 
-    pass #to be implemented later
     
 class Polygon(Matable) : 
     """Base class for Polygons, as the name suggests."""
@@ -94,7 +96,7 @@ class Triangle(Polygon):
         super().__init__(point1, point2, point3)
 
 class Circle(Matable) : 
-    def __init__(self, center: tuple, radius: tuple): 
+    def __init__(self, center: tuple, radius: int): 
         self.center = center
         self.radius = radius
         self.circumference = pi * (radius **2) 
@@ -116,3 +118,6 @@ class Circle(Matable) :
 
     def set_radius(self, radius: Union[int, float]): 
         return Circle(self.center, radius)
+
+    def __repr__(self): 
+        return f"Circle({self.center}, {self.radius})"
