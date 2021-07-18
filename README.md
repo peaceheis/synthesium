@@ -1,4 +1,4 @@
 # Synthesium - combining coding and creativity.
 Synthesium is an animation engine inspired by the effort to <em>programmatically</em> generate animations based on synesthesia.
-There's still quite a long way to go until it's ready, but when it becomes workable, it will be a tool to use code to animate, 
-without sacrificing expressiveness.
+
+The first <a href= "https://github.com/peaceheis/synthesium/releases/tag/v0.1">working version</a> is available, but there's still much, much more to come.
