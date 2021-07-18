@@ -8,17 +8,17 @@ from ..utils.imports import *
 class Matable():
     """Short for Animatable Object, a Matable is designed to hold points, which are tuples of coordinate pairs and instructions on how to connect them.
     For simple reference, point[0] will always mean an x-value of a point, and point[1] will always mean the y-value."""
-    def __init__(self, *points: Union[tuple, list]): 
+    def __init__(self, /, points: Union[tuple, list], color=PURE_BLUE): 
         temp_list = []
         for point in points:
             temp_list.append(point)
         self.points = tuple(temp_list) #tuples require less memory space, and points generally shouldn't be changing in terms of length.
+        self.color = color
     
-    def draw(self, ctx): #TODO, implement draw()
+    def draw(self, surface, ctx): #TODO, implement draw()
         """*VERY* important. Every Matable must override draw, as it is central to rendering in Synthesium.
         Draw takes in an empty cairo context, prints itself on it, and then returns a pixel array, but draw can ignore the cairo context and simply 
         use a pixel array."""
-
 
     #GENERAL FUNCTIONS DEALING WITH MOVEMENT
     def rotate(self, degrees, center, rotates_clockwise = True): 
@@ -65,8 +65,8 @@ class Matable():
             #shift back from center being origin to original location
             point[0] += center[0]
             point[1] += center[1]
-            point = tuple(*point)
-        self.points = tuple(*self.points)
+            point = tuple(point)
+        self.points = tuple(self.points)
         return self
             
     def shift(self, amt: tuple):
@@ -75,8 +75,8 @@ class Matable():
         for point in self.points: 
             new_x_value = point[0] + amt[0] - amt[1] #calculate shifted x-coord
             new_y_value = point[1] + amt[2] - amt[3] #calculate shifted y-coord
-            new_point_list.append(tuple(new_x_value, new_y_value))
-        self.points = tuple(*new_point_list)
+            new_point_list.append((new_x_value, new_y_value))
+        self.points = tuple(new_point_list)
         return self
 
     def set_points(self, *points): 
@@ -102,8 +102,8 @@ class MatableGroup(Matable):
     def shift(self, amt: tuple): 
         self.shift = [matable.shift(amt) for matable in self.matables]
 
-    def draw(self): 
-        for matable in self.matables: matable.draw()
+    def draw(self, surface, ctx): 
+        for matable in self.matables: matable.draw(surface, ctx)
         
 
 #some predefined Matables
@@ -133,8 +133,9 @@ class Line(Curve) :
     
 class Polygon(Matable) : 
     """Base class for Polygons, as the name suggests."""
-    def __init__(self, *points): 
-        super().__init__(points)
+    def __init__(self, /, points, color = PURE_BLUE): 
+        super().__init__(points=points, color=color)
+        self.color = color
     
     def get_num_points(self) : 
         return len(self.points)
@@ -142,7 +143,7 @@ class Polygon(Matable) :
     def get_points(self) : 
         return self.points
 
-    def __str__(self) : 
+    def __str__(self) :
         string = ""
         for i, point in enumerate(self.points) : 
             string += f"{i}: {point}\n"
@@ -153,15 +154,24 @@ class Polygon(Matable) :
         
     def shift(self, amt: tuple) : 
         for point in self.points : 
-            point = point.shift(amt)
+            super().shift(amt)
         
-        self = Polygon(*self.points)
         return self
+
+    def draw(self, surface, ctx): 
+        ctx.new_sub_path()
+        ctx.set_source_rgba(*self.color[:3], self.color[3])
+        for point in self.points: 
+            ctx.line_to(*point)
+        ctx.stroke_preserve()
+        ctx.fill()
+        return surface
+
        
 class Quadrilateral(Polygon) :
     """Class for any Quadrilaterals, inheriting from Polygon."""
-    def __init__(self, point1, point2, point3, point4) : 
-        super().__init__(point1, point2, point3, point4)
+    def __init__(self, point1, point2, point3, point4, color = PURE_GREEN) : 
+        super().__init__((point1, point2, point3, point4), color)
 
 class Triangle(Polygon): 
     """I would think the name is self-explanatory."""
@@ -170,16 +180,22 @@ class Triangle(Polygon):
 
 
 class Arc(): 
-    def __init__(self, center: tuple, radius: int, degrees: int): 
+    def __init__(self, center: tuple, radius: int, degrees: int, color = PURE_BLUE): 
         self.center = center
         self.radius = radius
         self.degrees = degrees 
+        self.color = color
         
     def get_arc_length(self): 
         return self.radius*2 * (self.degrees/360) * pi #the arclength formula
 
-    def draw(self, ctx: cairo.Context): 
-        pass
+    def draw(self, surface, ctx): 
+        ctx.new_sub_path()
+        ctx.set_source_rgba(*self.color[:3], self.color[3])
+        ctx.arc(*self.center, self.radius, 0, 2*pi)
+        ctx.stroke_preserve()
+        ctx.fill()
+        return surface
 
     
 
@@ -213,12 +229,11 @@ class Circle(Arc):
     def __repr__(self): 
         return f"Circle({self.center}, {self.radius})"
 
-    def draw(self, surface: cairo.ImageSurface, ctx): 
-        width = surface.get_width()
-        height = surface.get_height() 
+    def draw(self, surface, ctx): 
         ctx.new_sub_path()
-        ctx.set_source_rgba(1, 0, 0, 1)
+        ctx.set_source_rgba(*self.color[:3], self.color[3])
         ctx.arc(*self.center, self.radius, 0, 2*pi)
-        ctx.stroke()
+        ctx.stroke_preserve()
+        ctx.fill()
         return surface
 
