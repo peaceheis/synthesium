@@ -1,7 +1,3 @@
-from math import sqrt
-
-
-#TODO, write some more rate_funcs
 
 #rate_funcs
 def constant(current_frame, total_frames): 

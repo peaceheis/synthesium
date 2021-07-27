@@ -1,18 +1,22 @@
-import os, os.path
-import tempfile
+import os
+import os.path
 import shutil
-
-from cairo import ImageSurface
-import ffmpeg
-
-from synthesium.utils.useful_functions import linear_increase
+import tempfile
 from typing import Iterable
-from ..utils.imports import *
-from ..matables.matables import Matable, Circle, Line
-from ..mations.mations import Mation, ConcurrentMation, Move
+
+import ffmpeg
+from cairo import ImageSurface
+import cairo
+
+from synthesium.utils.imports import *
+from synthesium.matables.primitives import Line, Arc, Curve
+from synthesium.matables.matable import Matable
+from synthesium.matables.matablegroup import MatableGroup
+from synthesium.mations.mations import ConcurrentMation, Mation
 
 
-class Scene(): 
+
+class Canvas(): 
     def __init__(self, /, background_color=(0, 0, 0, 1), fps=24, frame_size=(2000, 1600)): #TODO, make a better default frame size
         self.mations = []
         self.background_color = background_color
@@ -22,7 +26,7 @@ class Scene():
 
         #cairo things
         self.surface = ImageSurface(cairo.Format.ARGB32, self.width, self.height)
-        self.ctx = cairo.Context(self.surface)
+        self.bg_ctx = cairo.Context(self.surface)
         self.initialize_surface()
     
         
@@ -34,14 +38,16 @@ class Scene():
         self.ctx.fill()
 
 
-    def play(self, *mations): 
+    def add_mation(self, *mations): 
         """calling self.add(mation) doesn't do much besides add it to the list of Mations to be processed. The heavy lifting is done when
-        Scene.view() is called, outside the class definition."""
+        Canvas.view() is called, outside the class definition."""
         for mation in mations: 
             mation.set_fps(self.fps)
             self.mations.append(mation)
 
     def save(self, tmpdir: str, enddir: str): 
+        """This is where all the rendering work gets done. First, the mationlist is sorted by end frame,
+        then the """
         #sort list of Mations
         sorter = lambda mation: mation.get_start_frame()
         mationlist: list[Matable] = sorted(self.mations, key=sorter)
@@ -61,7 +67,7 @@ class Scene():
             if i < 10:
                 self.surface.write_to_png("{}/00{}temp.png".format(tmpdir, i))
             elif i < 100:
-                self.surface.write_to_png("{}/0{}temp.png".format(tmpdir, i)) #TODO, make better system
+                self.surface.write_to_png("{}/0{}temp.png".format(tmpdir, i)) #TODO, convert to adding an ffmpeg pipe with np array, MUCH easier on disk and much faster.
             else: 
                 self.surface.write_to_png("{}/{}temp.png".format(tmpdir, i))
             self.initialize_surface()

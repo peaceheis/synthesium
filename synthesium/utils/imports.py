@@ -4,4 +4,4 @@ import numpy as np
 import ffmpeg
 import cairo
 
-from .colors import *
+from synthesium.utils.colors import *
