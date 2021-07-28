@@ -1,5 +1,4 @@
-from math import sqrt, pi, sin, cos, atan
-from typing import Iterable
+from math import sqrt
 
 from synthesium.utils.useful_functions import *
 from synthesium.utils.imports import * 
