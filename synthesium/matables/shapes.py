@@ -7,10 +7,9 @@ from synthesium.matables.matablegroup import MatableGroup
 from synthesium.matables.primitives import * #Arc, Line, Curve
 
 class Circle(Arc): 
-    def __init__(self, center: tuple, radius: int, color = PURE_GREEN): 
-        super().__init__(center, radius, 360)
+    def __init__(self, center: tuple, radius: int, **kwargs): 
+        super().__init__(center, radius, 0, 360, **kwargs)
         self.circumference = pi * (radius **2) 
-        self.color = color
     
     def shift(self, amt: tuple):
         center = self.center

@@ -12,16 +12,66 @@ class Line(Matable):
     def __init__(self, point1, point2, **kwargs):
         super().__init__(point1, point2, **kwargs)
 
+    def get_point1(self): 
+        return self.points[0]
+
+    def set_point1(self, point):
+        self.points[0] = point
+        return self
+
+    def get_point2(self):
+        return self.points[1]
+
+    def set_point2(self, point):
+        self.point[1] = point
+        return self
+
 class Arc(Matable): 
-    def __init__(self, center: tuple, radius: int, degrees: int, color = PURE_BLUE): 
+    def __init__(self, center: tuple, radius: int, angle1: int, angle2: int, **kwargs): 
+        default_config = {
+            "color": PURE_BLUE
+        }
         self.center = center
         self.radius = radius
-        self.degrees = degrees 
-        self.color = color
+        self.angle1 = angle1
+        self.angle2 = angle2 
         self.points = (center, ) #for compatability purposes with the rest of the engine, which assumes all Matables have a tuple attribute called self.points.
+        self.configure(default_config, **kwargs)
         
     def get_arc_length(self): 
         return self.radius*2 * (self.degrees/360) * pi #the arclength formula
+
+    def get_center(self):
+        return self.center
+
+    def set_center(self, center): 
+        self.center = center
+        self.points = (center, )
+        return self
+
+    def get_radius(self): 
+        return self.radius
+
+    def set_radius(self, radius): 
+        self.radius = radius
+
+    def get_degrees(self): 
+        return abs(self.angle1 - self.angle2)
+
+    def get_angle1(self): 
+        return self.angle1
+
+    def set_angle1(self, angle): 
+        self.angle1 = angle
+        return self
+
+    def get_angle2(self): 
+        return self.angle2
+
+    def set_angle2(self, angle): 
+        self.angle2 = angle
+        return self
+
 
 class Curve(Matable):
     def __init__(self, anchor1, handle1, handle2, anchor2): 
