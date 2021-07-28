@@ -28,7 +28,7 @@ class Mation:
                         #played() in a Canvas
         self.total_frames = None
 
-    def tick(self, current_frame) -> Matable:
+    def tick(self) -> Matable:
         """Tick gets called by Canvas to make the mation advance by one frame: tick updates the `target` Matable, and updates 
         the attribute self.current_frame, which is initialized ONLY after set_fps is called by Canvas, by the amount returned by the rate_function."""
 

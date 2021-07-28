@@ -17,7 +17,6 @@ class Move(Mation):
     def tick(self): 
         single_frame_amount = [amt/self.total_frames for amt in self.amount]
         adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in single_frame_amount]
-        self.current_frame += 1
         return self.target.shift(tuple(adjusted_frame_amount))
 
     def __repr__(self): 

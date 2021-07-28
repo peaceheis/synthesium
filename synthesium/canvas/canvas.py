@@ -52,20 +52,24 @@ class Canvas():
     #auxiliary functiosn to save()
 
     def sort_mationlist(self):
-        """Sorts the mationlist by start frame. It assumes that the animations have been play()ed, and therefore have
+        """Sorts the mationlist by start frame. It assumes that the Mations have been added, and therefore have
            had their fps set, because otherwise, how would they be in self.mations in the first place?"""
         
-        return sorted(self.mations, key=Mation.get_start_frame())
+        return sorted(self.mations, key= Mation.get_start_frame)
 
-    def merge_mations(self, mationlist):
+    def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
         merged_list = []
+        mationlist = self.mations
         len_minus_1 = len(mationlist) - 1 #it's used a lot, nice for convenience. 
 
         def overlap(mation1: Mation, mation2: Mation): 
             return mation1.get_end_frame() >= mation2.get_start_frame() #check if the second mation starts before or when the first mation ends.
         
+        if not len(mationlist) > 1: 
+            return mationlist
+
         current_group = MationGroup() #initialize an empty MationGroup for mations to be added later.
         for i in range(len_minus_1): 
             mation1 = mationlist[i]
@@ -84,7 +88,7 @@ class Canvas():
         return merged_list
 
     def prepare_for_rendering(self, end_dir): 
-        if not os.path.split()[0].exists(): 
+        if not os.path.exists(os.path.split(end_dir)[0]):
             raise Exception(f"directory {end_dir} provided to Canvas {self.__class__.__name__} does not exist.")
 
         command = [
@@ -108,7 +112,7 @@ class Canvas():
 
     def save(self, end_dir: str): 
         """This is where all the rendering work gets done. The steps are as follows:
-                1. The mation list is sorted by start frame,
+                1. The mation list is constructed (by calling the user-defined construct()), and sorted by start frame,
                 2. A compressed list where any overlapping Mations are made into a MationGroup is generated,
                 3. After verification of the end directory, a pipe is opened to ffmpeg to string together all the frames.
                 Then things get interesting. 
@@ -122,21 +126,26 @@ class Canvas():
                     5g. Draw an individual Curve.
                     5h. Raise an exception if the returned matable fits none of the cases from 5b - 5h.
                     5i. The context drawing the Matables gets converted to a NumPy pixel array to be added to the pipe.
-                    5j. The pixel array is written to the pipe."""
+                    5j. The pixel array is written to the pipe.
+                6. The video is written."""
 
+        self.construct()
         self.mations = self.sort_mationlist() #1
-        self.mations = self.merge_mations(self.mations) #2 
+        self.mations = self.merge_mations() #2 
         self.pipe = self.prepare_for_rendering(end_dir) #3
 
         current_frame = 0
+
         for mation in self.mations: 
+            print(mation)
             for _ in mation.get_range_of_frames(): #5
                 matable = mation.tick() #5a.
+                print(current_frame)
                 #MatableGroup handling
                 if isinstance(matable, MatableGroup): 
                     to_be_drawn: list = matable.get_matables_by_type(Line) #5b
                     for line in to_be_drawn: 
-                        self.ctx.set_source_rgba(*line.color) #TODO, implement full customization for context
+                        self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
                         self.ctx.move_to(*line.get_point1())
                         self.ctx.line_to(*line.get_point2()) 
                         self.ctx.stroke_preserve()
@@ -144,7 +153,7 @@ class Canvas():
                     
                     to_be_drawn = matable.get_matables_by_type(Arc) #5c
                     for arc in to_be_drawn:
-                        self.ctx.set_source_rgba(*arc.color)
+                        self.ctx.set_source_rgba(*arc.config["color"])
                         self.ctx.new_sub_path()
                         self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle_1(), arc.get_angle_2()) 
                         self.ctx.stroke_preserve()
@@ -152,28 +161,28 @@ class Canvas():
 
                     to_be_drawn = matable.get_matables_by_type(Curve) #5d
                     for curve in to_be_drawn: 
-                        self.ctx.set_source_rgba(*curve.color)
+                        self.ctx.set_source_rgba(*curve.config["color"])
                         self.ctx.move_to(curve.get_points()[0])
                         self.ctx.curve_to(*curve.get_points[1], *curve.get_points[2], *curve.get_points[3]) 
                         self.ctx.stroke_preserve()
                         self.ctx.fill() #5d
 
                 elif isinstance(matable, Line): #53
-                    self.ctx.set_source_rgba(*matable.color) 
+                    self.ctx.set_source_rgba(*matable.config["color"]) 
                     self.ctx.move_to(*matable.get_point1())
                     self.ctx.line_to(*matable.get_point2()) 
                     self.ctx.stroke_preserve()
                     self.ctx.fill() #5e
 
                 elif isinstance(matable, Arc): 
-                    self.ctx.set_source_rgba(*matable.color)
+                    self.ctx.set_source_rgba(*matable.config["color"])
                     self.ctx.new_sub_path()
                     self.ctx.arc(*matable.get_center(), matable.get_radius(), matable.get_angle_1(), matable.get_angle_2()) 
                     self.ctx.stroke_preserve()
                     self.ctx.fill() #5f
 
                 elif isinstance(matable, Curve): #5g
-                    self.ctx.set_source_rgba(*matable.color)
+                    self.ctx.set_source_rgba(*matable.config["color"])
                     self.ctx.move_to(*matable.get_points()[0])
                     self.ctx.curve_to(*matable.get_points[1], *matable.get_points[2], *matable.get_points[3])
                     self.ctx.stroke_preserve()
@@ -189,18 +198,13 @@ class Canvas():
                      dtype=numpy.uint32,
                      buffer=buf)
 
-                if self.write_to_movie:
-                    self.pipe.stdin.write(data) #5j.  TODO, arrange the data to ffmpeg-compatiable format.
+                print(data)
+                self.pipe.stdin.write(data) #5j.  TODO, arrange the data to ffmpeg-compatiable format.
 
-        self.pipe.terminate()
+                current_frame += 1
+
+        self.pipe.terminate() #6
                 
-                
-            
-
-
-
-
-
     def write(self, /, tmpdir: str, enddir: str): 
         self.construct()
         self.save(tmpdir, enddir)
