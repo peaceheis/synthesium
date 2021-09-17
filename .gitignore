@@ -1,4 +1,7 @@
 *.DS_Store
+*.xml
+*.iml
+*.json
 
 __pycache__/
 

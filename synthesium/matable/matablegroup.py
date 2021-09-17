@@ -2,8 +2,8 @@
 from typing import Type
 
 from synthesium.utils.imports import *
-from synthesium.matables.matable import Matable
-from synthesium.matables.primitives import *
+from synthesium.matable.matable import Matable
+from synthesium.matable.primitives import *
 
 class MatableGroup(Matable):
     def __init__(self, *matables: Union[tuple, list], **kwargs): 

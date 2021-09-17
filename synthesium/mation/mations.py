@@ -1,5 +1,6 @@
-from synthesium.mations.mation import Mation
-from synthesium.matables.matable import Matable
+from synthesium.utils.useful_functions import constant
+from synthesium.mation.mation import Mation
+from synthesium.matable.matable import Matable
 
 #some predefined Mations
 class Show(Mation): 
@@ -10,7 +11,7 @@ class Show(Mation):
         return self.target
 
 class Move(Mation):
-    def __init__(self, target: Matable, amount: tuple, start_second: int, start_frame, end_second, end_frame, rate_func):
+    def __init__(self, target: Matable, amount: tuple, start_second: int, start_frame, end_second, end_frame, rate_func=constant):
         super().__init__(target, start_second, start_frame, end_second, end_frame, rate_func)
         self.amount = amount
 
@@ -19,5 +20,3 @@ class Move(Mation):
         adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in single_frame_amount]
         return self.target.shift(tuple(adjusted_frame_amount))
 
-    def __repr__(self): 
-        return f"Mation({self.target}, {self.amount}, {self.start_second}, {self.start_frame}, {self.end_second}, {self.end_frame}"

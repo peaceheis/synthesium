@@ -6,7 +6,7 @@ from synthesium.utils.colors import PURE_BLUE
 from math import pi
 
 from synthesium.utils.imports import *
-from synthesium.matables.matable import Matable
+from synthesium.matable.matable import Matable
 
 class Line(Matable): 
     def __init__(self, point1, point2, **kwargs):
@@ -29,14 +29,14 @@ class Line(Matable):
 class Arc(Matable): 
     def __init__(self, center: tuple, radius: int, angle1: int, angle2: int, **kwargs): 
         default_config = {
-            "color": PURE_BLUE
+            "color": PURE_BLUE #TODO, get rid of the config system. No. Just no.
         }
         self.center = center
         self.radius = radius
         self.angle1 = angle1
         self.angle2 = angle2 
         self.points = (center, ) #for compatability purposes with the rest of the engine, which assumes all Matables have a tuple attribute called self.points.
-        self.configure(default_config, **kwargs)
+        self.config = self.configure(default_config, **kwargs)
         
     def get_arc_length(self): 
         return self.radius*2 * (self.degrees/360) * pi #the arclength formula

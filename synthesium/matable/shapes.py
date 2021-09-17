@@ -2,11 +2,12 @@
 from typing import Union
 
 from synthesium.utils.imports import *
-from synthesium.matables.matable import Matable
-from synthesium.matables.matablegroup import MatableGroup
-from synthesium.matables.primitives import * #Arc, Line, Curve
+from synthesium.matable.matable import Matable
+from synthesium.matable.matablegroup import MatableGroup
+from synthesium.matable.primitives import * #Arc, Line, Curve
 
 class Circle(Arc): 
+    """Circles are really just 360 degree Arcs."""
     def __init__(self, center: tuple, radius: int, **kwargs): 
         super().__init__(center, radius, 0, 360, **kwargs)
         self.circumference = pi * (radius **2) 
@@ -48,8 +49,8 @@ class Polygon(MatableGroup) :
 
         matables = [] 
         for i in range(len(points) - 1):  #using 1 less because the last point has to connect to the first point, which requires special handling.
-            matables += Line(points[i], points[i+1])
-        matables += Line(points[-1], points[0]) #connect last element and first element.
+            matables.append(Line(points[i], points[i+1]))
+        matables.append(Line(points[-1], points[0])) #connect last element and first element.
 
         super().__init__(*matables, **kwargs) #let MatableGroup handle the rest.
         self.configure(default_config, **kwargs) #while MatableGroup also has configure() in the init, it's best to update with Polygon's default config.
@@ -83,7 +84,7 @@ class Square(MatableGroup):
 
         super().__init__(*points, **kwargs) 
 
-class Triangle(MatableGroup): 
+class Triangle(Polygon): 
     """I would think the name is self-explanatory."""
     def __init__(self, point1, point2, point3, **kwargs): 
         super().__init__(point1, point2, point3, **kwargs)

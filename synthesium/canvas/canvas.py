@@ -1,18 +1,21 @@
 import os
 import os.path
+from synthesium.utils.useful_functions import linear_increase
+from synthesium.matable.shapes import Circle, Triangle
 from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 import subprocess
 
 import numpy
 from cairo import ImageSurface
 import cairo
+from PIL import Image
 
 from synthesium.utils.imports import *
-from synthesium.matables.primitives import * #Line, Arc, Curve
-from synthesium.matables.matable import Matable
-from synthesium.matables.matablegroup import MatableGroup
-from synthesium.mations.mation import Mation
-from synthesium.mations.mationgroup import MationGroup
+from synthesium.matable.primitives import * #Line, Arc, Curve
+from synthesium.matable.matable import Matable
+from synthesium.matable.matablegroup import MatableGroup
+from synthesium.mation.mation import Mation
+from synthesium.mation.mationgroup import MationGroup
 
 class Canvas():  
     """The canvas acts as the entry point between the user and Synthesium. The user creates a class that inherits from Canvas,
@@ -20,12 +23,13 @@ class Canvas():
        finished video. All the rendering goes on in here, breaking MatableGroups down to Primitives, and then cairo draws the 
        primitives. In addition, animation goes on here, by calling tick on every active Mation."""
 
-    def __init__(self, /, background_color=(0, 0, 0, 1), fps=DEFAULT_FPS, frame_size=(2000, 1600)): #TODO, make a better default frame size
+    def __init__(self, /, background_color=(0, 0, 0, 1), fps=DEFAULT_FPS, canvas_size=(DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT), \
+                 frame_size = (DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT)): #TODO, make a better default frame size
         self.mations = []
         self.background_color = background_color
         self.fps = fps
-        self.width = frame_size[0]
-        self.height = frame_size[1]
+        self.width, self.height = canvas_size #canvas size is the size of the canvas in which everything will be drawn...
+        self.frame_width, self.frame_height = frame_size #...frame size is the size of the output video. this allows for things like panning cameras.
 
         #cairo things
         self.surface = ImageSurface(cairo.Format.ARGB32, self.width, self.height)
@@ -33,7 +37,7 @@ class Canvas():
         self.initialize_surface()
     
     def get_dimensions(self): 
-        return (self.width, self.height)
+        return (self.width, self.height) #TODO work on capturing
 
     def initialize_surface(self): 
         #initialize background color
@@ -42,14 +46,15 @@ class Canvas():
         self.ctx.rectangle(0, 0, self.width, self.height)
         self.ctx.fill()
 
-    def add_mation(self, *mations): 
+    def add_mations(self, *mations): 
         """calling self.add(mation) doesn't do much besides add it to the list of Mations to be processed. The heavy lifting is done when
-        Canvas.view() is called, outside the class definition."""
+        Canvas.write() is called, outside the class definition."""
         for mation in mations: 
             mation.set_fps(self.fps)
             self.mations.append(mation)
 
-    #auxiliary functiosn to save()
+
+    #auxiliary functions to save()
 
     def sort_mationlist(self):
         """Sorts the mationlist by start frame. It assumes that the Mations have been added, and therefore have
@@ -60,34 +65,47 @@ class Canvas():
     def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
+
+        if len(self.mations) == 1: #no point merging if there's just one Mation
+            return self.mations
+
         merged_list = []
         mationlist = self.mations
         len_minus_1 = len(mationlist) - 1 #it's used a lot, nice for convenience. 
 
-        def overlap(mation1: Mation, mation2: Mation): 
-            return mation1.get_end_frame() >= mation2.get_start_frame() #check if the second mation starts before or when the first mation ends.
+        def overlap_exists_between(mation1: Mation, mation2: Mation): 
+            return mation2.get_start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
+             #check if the second mation starts before or when the first mation ends, but starts after or when the first mation starts.
         
-        if not len(mationlist) > 1: 
+        if len(mationlist) == 1:
             return mationlist
 
-        current_group = MationGroup() #initialize an empty MationGroup for mations to be added later.
+        current_group = MationGroup(fps=self.fps) #initialize an empty MationGroup for mations to be added later.
         for i in range(len_minus_1): 
+
             mation1 = mationlist[i]
             mation2 = mationlist[i+1]
 
-            if overlap(mation1, mation2): 
-                current_group.add(mation1) #just the first one to avoid repetition, as mation2 will get added when i gets incremented.
-            
-            else:
-                if len(current_group.get_mations()) > 0: #makes sure the MationGroup isn't empty, which would defeat the purpose of the group.
-                    current_group.add(mation1)
-                    merged_list += current_group
-                
-                else: 
-                    merged_list += mation1 #if there's nothing in the MationGroup, just add the Mation by itself
+            if overlap_exists_between(mation1, mation2): 
+                current_group.add(mation1)
+            else: 
+                if len(current_group.get_mations()) > 1:
+                    merged_list.append(current_group)
+                    current_group = MationGroup(fps=self.fps)
+
+
+        if len(current_group.get_mations()) > 1: 
+            if overlap_exists_between(mation1, mation2): 
+                current_group.add(mation2)
+            merged_list.append(current_group)
+
+        else: 
+            merged_list.append(mation2)
+        
         return merged_list
 
-    def prepare_for_rendering(self, end_dir): 
+
+    def open_pipe_for_rendering(self, end_dir): 
         if not os.path.exists(os.path.split(end_dir)[0]):
             raise Exception(f"directory {end_dir} provided to Canvas {self.__class__.__name__} does not exist.")
 
@@ -95,20 +113,57 @@ class Canvas():
             FFMPEG_BIN, 
             '-y',  # overwrite output file if it exists
             '-f', 'rawvideo',
-            '-s', '{}, {}'.format(self.width, self.height),  # size of one frame
+            '-s', str(self.frame_width) + 'x' + str(self.frame_height),  # size of one frame
             '-pix_fmt', 'rgba',
             '-r', str(self.fps),  # frames per second
             '-i', '-',  # The imput comes from a pipe
             '-an',  # Tells FFMPEG not to expect any audio
             '-loglevel', 'error',
+            '-vcodec', 'libx264',
+            '-pix_fmt', 'yuv420p',
         ]  
-        command += [
-                '-vcodec', 'qtrle',
-            ] #TODO hard coded transparency..... sub-optimal at best.
+
+
             
         command += [end_dir] #TODO, implement partial movie files à la Manim.
         return subprocess.Popen(command, stdin=subprocess.PIPE)
-        #credit to Manim (github.com/3b1b/manim). I adapted this code from scene.file-writer.py, in the cairo-backend branch.
+        #credit to Manim (https://github.com/3b1b/manim). I adapted this code from scene.file-writer.py, in the cairo-backend branch.
+
+    def draw_line(self, line): 
+        self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
+        self.ctx.new_sub_path()
+        self.ctx.move_to(*line.get_point1())
+        self.ctx.line_to(*line.get_point2()) 
+        self.ctx.stroke_preserve()
+        self.ctx.fill() #5b
+
+    def draw_arc(self, arc): 
+        self.ctx.set_source_rgba(*arc.config["color"])
+        self.ctx.new_sub_path()
+        self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
+        self.ctx.stroke_preserve()
+        self.ctx.fill() #5c
+
+    def draw_curve(self, curve):
+        self.ctx.set_source_rgba(*curve.config["color"])
+        self.ctx.new_sub_path()
+        self.ctx.move_to(*curve.get_points()[0])
+        self.ctx.curve_to(*curve.get_points()[0], *curve.get_points()[1], *curve.get_points()[2], *curve.get_points()[3]) 
+        self.ctx.stroke_preserve()
+        self.ctx.fill() #5d
+
+    def draw_matable_group(self, mgroup):
+        to_be_drawn: list = mgroup.get_matables_by_type(Line)
+        for line in to_be_drawn: 
+            self.draw_line(line)
+
+        to_be_drawn: list = mgroup.get_matables_by_type(Arc)
+        for arc in to_be_drawn: 
+            self.draw_arc(arc)
+
+        to_be_drawn:list = mgroup.get_matables_by_type(Curve)
+        for curve in to_be_drawn: 
+            self.draw_curve(curve)
 
     def save(self, end_dir: str): 
         """This is where all the rendering work gets done. The steps are as follows:
@@ -118,78 +173,40 @@ class Canvas():
                 Then things get interesting. 
                 5. The animation gets rendered via loop: 
                     5a. Make the animation progress 1 frame.
-                    5b. Get, and draw, all the Lines to be drawn.
-                    5c. Get, and draw, all the Arcs to be drawn.
-                    5d. Get, and draw, all the Curves to be drawn (5b - 5d all have to do with MatableGroups.)
-                    5e. Draw an individual Line.
-                    5f. Draw an individual Arc.
-                    5g. Draw an individual Curve.
-                    5h. Raise an exception if the returned matable fits none of the cases from 5b - 5h.
-                    5i. The context drawing the Matables gets converted to a NumPy pixel array to be added to the pipe.
-                    5j. The pixel array is written to the pipe.
+                    For every matable returned by a Mation: 
+                        5b. If it's a MatableGroup, break it down into its components and draw them.
+                        5c. If it's a Line, draw it.
+                        5d. If it's an Arc, draw it.
+                        5e. If it's a Curve, draw it.
+                    5f. Raise an exception if the returned matable fits none of the cases from 5b - 5h.
+                    5g. The context drawing the Matables gets converted to a NumPy pixel array to be added to the pipe.
+                    5h. The pixel array is written to the pipe.
                 6. The video is written."""
 
-        self.construct()
+        if len(self.mations) == 0: 
+            raise Exception("No Mations were added!")
         self.mations = self.sort_mationlist() #1
         self.mations = self.merge_mations() #2 
-        self.pipe = self.prepare_for_rendering(end_dir) #3
-
-        current_frame = 0
+        self.pipe = self.open_pipe_for_rendering(end_dir) #3
 
         for mation in self.mations: 
-            print(mation)
             for _ in mation.get_range_of_frames(): #5
                 matable = mation.tick() #5a.
-                print(current_frame)
                 #MatableGroup handling
                 if isinstance(matable, MatableGroup): 
-                    to_be_drawn: list = matable.get_matables_by_type(Line) #5b
-                    for line in to_be_drawn: 
-                        self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
-                        self.ctx.move_to(*line.get_point1())
-                        self.ctx.line_to(*line.get_point2()) 
-                        self.ctx.stroke_preserve()
-                        self.ctx.fill() #5b
-                    
-                    to_be_drawn = matable.get_matables_by_type(Arc) #5c
-                    for arc in to_be_drawn:
-                        self.ctx.set_source_rgba(*arc.config["color"])
-                        self.ctx.new_sub_path()
-                        self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle_1(), arc.get_angle_2()) 
-                        self.ctx.stroke_preserve()
-                        self.ctx.fill() #5c
+                    self.draw_matable_group(matable) #5b
 
-                    to_be_drawn = matable.get_matables_by_type(Curve) #5d
-                    for curve in to_be_drawn: 
-                        self.ctx.set_source_rgba(*curve.config["color"])
-                        self.ctx.move_to(curve.get_points()[0])
-                        self.ctx.curve_to(*curve.get_points[1], *curve.get_points[2], *curve.get_points[3]) 
-                        self.ctx.stroke_preserve()
-                        self.ctx.fill() #5d
-
-                elif isinstance(matable, Line): #53
-                    self.ctx.set_source_rgba(*matable.config["color"]) 
-                    self.ctx.move_to(*matable.get_point1())
-                    self.ctx.line_to(*matable.get_point2()) 
-                    self.ctx.stroke_preserve()
-                    self.ctx.fill() #5e
+                elif isinstance(matable, Line): 
+                    self.draw_line(matable) #5c 
 
                 elif isinstance(matable, Arc): 
-                    self.ctx.set_source_rgba(*matable.config["color"])
-                    self.ctx.new_sub_path()
-                    self.ctx.arc(*matable.get_center(), matable.get_radius(), matable.get_angle_1(), matable.get_angle_2()) 
-                    self.ctx.stroke_preserve()
-                    self.ctx.fill() #5f
+                    self.draw_arc(matable) #5d
 
-                elif isinstance(matable, Curve): #5g
-                    self.ctx.set_source_rgba(*matable.config["color"])
-                    self.ctx.move_to(*matable.get_points()[0])
-                    self.ctx.curve_to(*matable.get_points[1], *matable.get_points[2], *matable.get_points[3])
-                    self.ctx.stroke_preserve()
-                    self.ctx.fill() #5g
+                elif isinstance(matable, Curve): 
+                    self.draw_curve(matable) #5e
 
                 else: 
-                    raise Exception("The Matable returned by tick is neither a MatableGroup, or a Primitive, and thus can't be drawn.") #5h
+                    raise Exception(f"The Matable returned by the tick method of mation {mation} is neither a MatableGroup, or a Primitive, and thus can't be drawn.") #5f
                     #should this be a warning?
 
                 width, height = self.get_dimensions()
@@ -197,19 +214,20 @@ class Canvas():
                 data = numpy.ndarray(shape=(height, width), 
                      dtype=numpy.uint32,
                      buffer=buf)
+                self.pipe.stdin.write(data.tobytes()) #5g.
 
-                print(data)
-                self.pipe.stdin.write(data) #5j.  TODO, arrange the data to ffmpeg-compatiable format.
+                self.initialize_surface()
 
-                current_frame += 1
-
+        self.pipe.stdin.close()
+        self.pipe.wait()
         self.pipe.terminate() #6
                 
-    def write(self, /, tmpdir: str, enddir: str): 
+    def write(self, enddir: str): #funny how the most involved method is the shortest.
         self.construct()
-        self.save(tmpdir, enddir)
+        self.save(enddir)
 
     def construct(self): 
         """Construct() lies at the heart of Synthesium. All Mations should be played in self.construct(), which the 
-        internal pipeline looks for when creating an animation. """
+        internal pipeline looks for when creating an animation. This idea from this comes from 3b1b's Manim. Check it out at https://github.com/3b1b/manim"""
         
+

@@ -3,25 +3,30 @@ while also making calls to a Canvas's renderer"""
 import warnings
 
 from synthesium.utils.defaults import DEFAULT_FPS
-from synthesium.matables.matable import *
+from synthesium.matable.matable import *
 from synthesium.utils.imports import *
 
 class Mation:
-    def __init__(self, target: Matable, start_second: int, start_frame, end_second: int, end_frame: int, rate_func):
-        self.target = target
+    def __init__(self, target: Matable, start_second: int, start_frame, end_second: int, end_frame: int, rate_func=constant):
         class InvalidRuntimeError(Exception): #here in the case an invalid runtime is encountered, i.e, end time < start time.
                 def __init__(self):
                     super().__init__(f"Beginning time was set to {start_second} seconds {start_frame} frames, \
                                        but end time was set to {end_second} seconds, {end_frame} frames")
+        self.target = target
         if start_second > end_second:  #here to prevend invalid runtimes
             raise InvalidRuntimeError()
         elif start_frame > end_frame: 
             if start_second == end_second:
                 raise InvalidRuntimeError() #TODO, create a more intuitive system for seconds, frames, and minutes. The current one is ugly.
+        
+        elif start_second == end_second and start_frame == end_frame: #to prevent non-existent runtimes, which leads to a ZeroDivisonError.
+            raise InvalidRuntimeError()
 
         else: 
-            self.start_second = start_second; self.start_frame = start_frame
-            self.end_second = end_second; self.end_frame = end_frame
+            self.start_second = start_second
+            self.start_frame = start_frame
+            self.end_second = end_second 
+            self.end_frame = end_frame
         self.rate_func = rate_func
 
         self.fps = None #makes a lot of computation easier for this attribute to be here, instead of it being undefined until it gets
@@ -72,7 +77,7 @@ class Mation:
 
     def get_end_frame(self, arg_fps=None): #while fps is optional, if self.fps has not been defined and fps is None, an exception will be thrown.
         if self.fps is None and arg_fps is None: 
-            raise Exception("Both fps and self.fps are undefined. Either use mation.set_fps(), or canvas.play() to set it.")
+            raise Exception("Both fps and self.fps are undefined. Either use Mation.set_fps(), or Canvas.play() to set it.")
         
         if self.fps is not None: 
             fps = self.fps #if fps is also defined, a warning will be raised and the argument fps will be used.
@@ -93,7 +98,7 @@ class Mation:
         assert(any([type(fps) == int, type(fps) == float])) #make sure fps is a number
         self.fps = fps
         self.current_frame = 0
-        self.total_frames = self.end_second*fps + self.end_frame
+        self.total_frames = self.get_end_second()*fps + self.end_frame
 
     def get_range_of_frames(self): #mostly for internal use
         return range(self.get_start()[0]*self.fps+self.get_start()[1], self.get_end()[0]*self.fps+self.get_start()[1]+1)
@@ -102,4 +107,4 @@ class Mation:
         return f"Mation of type {type(self)}"
 
     def __repr__(self):
-        return f"Mation({self.target}, {self.start_second}, {self.start_frame}, {self.end_second}, {self.end_frame}, {self.frame_addend}"
+        return f"{self.__class__.__name__}({self.target}, {self.start_second}, {self.start_frame}, {self.end_second}, {self.end_frame})"
