@@ -6,12 +6,13 @@ from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 import subprocess
 
 import numpy
-from cairo import ImageSurface
 import cairo
-from PIL import Image
+from cairo import ImageSurface
+
+
 
 from synthesium.utils.imports import *
-from synthesium.matable.primitives import * #Line, Arc, Curve
+from synthesium.matable.primitives import Line, Arc, Curve #Line, Arc, Curve
 from synthesium.matable.matable import Matable
 from synthesium.matable.matablegroup import MatableGroup
 from synthesium.mation.mation import Mation
@@ -66,12 +67,7 @@ class Canvas():
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
 
-        if len(self.mations) == 1: #no point merging if there's just one Mation
-            return self.mations
-
-        merged_list = []
-        mationlist = self.mations
-        len_minus_1 = len(mationlist) - 1 #it's used a lot, nice for convenience. 
+        mationlist = self.mations #it's a bit more intuitive to have a separate list
 
         def overlap_exists_between(mation1: Mation, mation2: Mation): 
             return mation2.get_start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
@@ -80,30 +76,65 @@ class Canvas():
         if len(mationlist) == 1:
             return mationlist
 
-        current_group = MationGroup(fps=self.fps) #initialize an empty MationGroup for mations to be added later.
-        for i in range(len_minus_1): 
-
-            mation1 = mationlist[i]
-            mation2 = mationlist[i+1]
-
+        if len(mationlist) == 2:
+            mation1 = mationlist[0]
+            mation2 = mationlist[1] 
             if overlap_exists_between(mation1, mation2): 
-                current_group.add(mation1)
-            else: 
-                if len(current_group.get_mations()) > 1:
-                    merged_list.append(current_group)
-                    current_group = MationGroup(fps=self.fps)
+                return [MationGroup(mation1, mation2, fps=self.fps)]
+            return mationlist
 
+        #assumes len 3 or longer
+        merged_list = []
+        current_group = MationGroup(fps=self.fps)
+        #check the first entry for overlap 
+        mation1 = mationlist[0]
+        mation2 = mationlist[1]
+        if overlap_exists_between(mation1, mation2):
+            current_group.add(mation1) #the second will be added during the loop
+        else: #no overlap
+            merged_list.append(mation1)
 
-        if len(current_group.get_mations()) > 1: 
-            if overlap_exists_between(mation1, mation2): 
-                current_group.add(mation2)
-            merged_list.append(current_group)
+        for i in range(len(mationlist)-2): #exclude first and last mations
+            before = mationlist[i]
+            mation = mationlist[i+1]
+            after = mationlist[i+2]
 
-        else: 
-            merged_list.append(mation2)
+            if overlap_exists_between(before, mation): 
+                current_group.add(mation)
+            
+            elif overlap_exists_between(mation, after): #a new group should be probably be started in this case, but to be sure:
+                if len(current_group.get_mations()) == 0: #no point in packaging an empty list, and in fact it'll break things.
+                    pass #there's no need to reset current_group, it's already initialized.
+                elif len(current_group.get_mations()) == 1: #if there's one, just add the contained Mation - no unnecessary MationGroups stealing memory.
+                    mationlist.append(*current_group.get_mations()) 
+                    current_group = MationGroup(fps=self.fps) #reset the group with the current mation.
+                elif len(current_group.get_mations() > 1): 
+                    mationlist.append(current_group) 
+                    current_group = MationGroup(mation, fps=self.fps) 
+                    #if the group is longer than 1, add the group to the list and start a new one with the current mation.
+            
+            else: #no overlap, this Mation's quite the special little snowflake innit?
+                mationlist.append(mation)
+    
+        #last mation handling: 
+        before = mationlist[-2]
+        mation = mationlist[-1] 
+        #see above for explanations
+        if overlap_exists_between(before, mation): 
+            if len(current_group.get_mations()) == 0: 
+                pass
+            elif len(current_group.get_mations()) == 1: 
+                mationlist.append(*current_group.get_mations()) 
+                current_group = MationGroup(fps=self.fps) 
+            elif len(current_group.get_mations() > 1): 
+                mationlist.append(current_group) 
+                current_group = MationGroup(mation, fps=self.fps)
         
-        return merged_list
+        #lastly, handle packaging of the final group
+        if not len(current_group) == 0: 
+            mationlist.append(current_group)
 
+        return current_group #all done
 
     def open_pipe_for_rendering(self, end_dir): 
         if not os.path.exists(os.path.split(end_dir)[0]):
@@ -127,7 +158,7 @@ class Canvas():
             
         command += [end_dir] #TODO, implement partial movie files à la Manim.
         return subprocess.Popen(command, stdin=subprocess.PIPE)
-        #credit to Manim (https://github.com/3b1b/manim). I adapted this code from scene.file-writer.py, in the cairo-backend branch.
+        #credit to Manim (https://github.com/3b1b/manim). I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def draw_line(self, line): 
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
