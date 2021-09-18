@@ -96,6 +96,8 @@ class Mation:
            after instantiation"""
         
         assert(any([type(fps) == int, type(fps) == float])) #make sure fps is a number
+        if self.get_start()[1] > 1: 
+            raise Exception("Mation's start_frame is greater than canvas' FPS.")
         self.fps = fps
         self.current_frame = 0
         self.total_frames = self.get_end_second()*fps + self.end_frame

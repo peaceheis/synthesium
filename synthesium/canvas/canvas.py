@@ -68,6 +68,8 @@ class Canvas():
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
 
         mationlist = self.mations #it's a bit more intuitive to have a separate list
+        if not mationlist: 
+            raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add_mation to do so.")
 
         def overlap_exists_between(mation1: Mation, mation2: Mation): 
             return mation2.get_start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
