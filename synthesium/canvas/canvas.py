@@ -133,10 +133,10 @@ class Canvas():
                 current_group = MationGroup(mation, fps=self.fps)
         
         #lastly, handle packaging of the final group
-        if not len(current_group) == 0: 
+        if not len(current_group.get_mations()) == 0: 
             mationlist.append(current_group)
 
-        return current_group #all done
+        return mationlist #all done
 
     def open_pipe_for_rendering(self, end_dir): 
         if not os.path.exists(os.path.split(end_dir)[0]):
@@ -223,6 +223,7 @@ class Canvas():
         self.pipe = self.open_pipe_for_rendering(end_dir) #3
 
         for mation in self.mations: 
+            print(f"Processing mation {mation}")
             for _ in mation.get_range_of_frames(): #5
                 matable = mation.tick() #5a.
                 #MatableGroup handling

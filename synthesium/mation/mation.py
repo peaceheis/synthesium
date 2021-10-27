@@ -19,14 +19,14 @@ class Mation:
             if start_second == end_second:
                 raise InvalidRuntimeError() #TODO, create a more intuitive system for seconds, frames, and minutes. The current one is ugly.
         
-        elif start_second == end_second and start_frame == end_frame: #to prevent non-existent runtimes, which leads to a ZeroDivisonError.
+        if start_second == end_second and start_frame == end_frame: #to prevent non-existent runtimes, which leads to a ZeroDivisonError.
             raise InvalidRuntimeError()
 
         else: 
             self.start_second = start_second
             self.start_frame = start_frame
             self.end_second = end_second 
-            self.end_frame = end_frame
+            self.end_frame = end_frame         
         self.rate_func = rate_func
 
         self.fps = None #makes a lot of computation easier for this attribute to be here, instead of it being undefined until it gets
@@ -96,7 +96,7 @@ class Mation:
            after instantiation"""
         
         assert(any([type(fps) == int, type(fps) == float])) #make sure fps is a number
-        if self.get_start()[1] > 1: 
+        if self.get_start()[1] > fps: 
             raise Exception("Mation's start_frame is greater than canvas' FPS.")
         self.fps = fps
         self.current_frame = 0
