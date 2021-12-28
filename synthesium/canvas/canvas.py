@@ -155,12 +155,11 @@ class Canvas():
             '-vcodec', 'libx264',
             '-pix_fmt', 'yuv420p',
         ]  
-
-
-            
+   
         command += [end_dir] #TODO, implement partial movie files à la Manim.
         return subprocess.Popen(command, stdin=subprocess.PIPE)
-        #credit to Manim (https://github.com/3b1b/manim). I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
+        # credit to Manim (https://github.com/3b1b/manim). 
+        # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def draw_line(self, line): 
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context

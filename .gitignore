@@ -2,7 +2,14 @@
 *.xml
 *.iml
 *.json
+*.cfg
+*.mp4
+*.png
 
 __pycache__/
-
+include/
+lib/
 tests/
+cynthesium/
+bin/
+.vscode/
