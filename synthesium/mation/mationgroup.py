@@ -3,6 +3,7 @@ from synthesium.mation import mation
 from synthesium.utils.imports import *
 from synthesium.mation.mation import Mation
 
+
 class MationGroup(Mation): 
     """a Mation composed of Mations, used internally with Canvas so that it only has to process one Mation at a time, which simplifies a lot of logic."""
     
@@ -28,8 +29,8 @@ class MationGroup(Mation):
     def __str__(self): 
         string = f"MationGroup of type {self.__class__.__name__}, composed of" 
         for mation in self.mations: 
-            string += f"\n\t Mation of type {mation.__class__.__name__} running from second {mation.get_start()[0]} frame {mation.get_start()[1]} \
-                       to second {mation.get_end()[0]} frame {mation.get_end()[1]}"
+            string += f"\n\t Mation of type {mation.__class__.__name__} running from second {mation.get_start()[0]} frame {mation.get_start()[1]} " + \
+            f"to second {mation.get_end()[0]} frame {mation.get_end()[1]}"
         return string
 
     def add(self, *mations): 
@@ -58,3 +59,5 @@ class MationGroup(Mation):
 
     def __repr__(self) -> str:
         return self.__str__() #TODO create MationGroup repr
+
+    

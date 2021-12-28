@@ -61,7 +61,7 @@ class Canvas():
         """Sorts the mationlist by start frame. It assumes that the Mations have been added, and therefore have
            had their fps set, because otherwise, how would they be in self.mations in the first place?"""
         
-        return sorted(self.mations, key= Mation.get_start_frame)
+        return sorted(self.mations, key=Mation.get_start_frame)
 
     def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
@@ -72,7 +72,7 @@ class Canvas():
             raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add_mation to do so.")
 
         def overlap_exists_between(mation1: Mation, mation2: Mation): 
-            return mation2.get_start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
+            return mation2.start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
              #check if the second mation starts before or when the first mation ends, but starts after or when the first mation starts.
         
         if len(mationlist) == 1:
@@ -184,7 +184,7 @@ class Canvas():
         self.ctx.stroke_preserve()
         self.ctx.fill() #5d
 
-    def draw_matable_group(self, mgroup):
+    def draw_matable_group(self, mgroup: MatableGroup):
         to_be_drawn: list = mgroup.get_matables_by_type(Line)
         for line in to_be_drawn: 
             self.draw_line(line)
@@ -210,7 +210,7 @@ class Canvas():
                         5c. If it's a Line, draw it.
                         5d. If it's an Arc, draw it.
                         5e. If it's a Curve, draw it.
-                    5f. Raise an exception if the returned matable fits none of the cases from 5b - 5h.
+                    5f. Raise an exception if the returned matable fits none of the cases from 5b - 5e.
                     5g. The context drawing the Matables gets converted to a NumPy pixel array to be added to the pipe.
                     5h. The pixel array is written to the pipe.
                 6. The video is written."""
@@ -262,5 +262,6 @@ class Canvas():
     def construct(self): 
         """Construct() lies at the heart of Synthesium. All Mations should be played in self.construct(), which the 
         internal pipeline looks for when creating an animation. This idea from this comes from 3b1b's Manim. Check it out at https://github.com/3b1b/manim"""
-        
+
+
 

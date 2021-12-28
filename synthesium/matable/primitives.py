@@ -38,36 +38,44 @@ class Arc(Matable):
         self.points = (center, ) #for compatability purposes with the rest of the engine, which assumes all Matables have a tuple attribute called self.points.
         self.config = self.configure(default_config, **kwargs)
         
-    def get_arc_length(self): 
+    def arc_length(self): 
         return self.radius*2 * (self.degrees/360) * pi #the arclength formula
 
-    def get_center(self):
+    @property
+    def center(self):
         return self.center
 
+    @center.setter
     def set_center(self, center): 
         self.center = center
         self.points = (center, )
         return self
 
-    def get_radius(self): 
+    @property
+    def radius(self): 
         return self.radius
 
+    @radius.setter
     def set_radius(self, radius): 
         self.radius = radius
 
-    def get_degrees(self): 
+    def degrees(self): 
         return abs(self.angle1 - self.angle2)
-
-    def get_angle1(self): 
+    
+    @property
+    def angle1(self): 
         return self.angle1
 
+    @angle1.setter
     def set_angle1(self, angle): 
         self.angle1 = angle
         return self
 
-    def get_angle2(self): 
+    @property
+    def angle2(self): 
         return self.angle2
 
+    @property.setter
     def set_angle2(self, angle): 
         self.angle2 = angle
         return self
