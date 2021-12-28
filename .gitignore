@@ -5,11 +5,11 @@
 *.cfg
 *.mp4
 *.png
+tests.py
 
 __pycache__/
 include/
 lib/
-tests/
 cynthesium/
 bin/
 .vscode/

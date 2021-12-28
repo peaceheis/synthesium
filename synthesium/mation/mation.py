@@ -7,7 +7,6 @@ from collections import namedtuple
 from synthesium.matable.matable import *
 from synthesium.utils.imports import *
 
-TimeMarker
 
 class Mation:
     def __init__(self, target: Matable, start: GROUP, end: GROUP, rate_func=constant):
