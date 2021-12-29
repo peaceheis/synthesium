@@ -1,3 +1,4 @@
+from synthesium.mation.timemarker import TimeMarker
 from synthesium.matable.matablegroup import MatableGroup
 from synthesium.mation import mation
 from synthesium.utils.imports import *
@@ -11,17 +12,18 @@ class MationGroup(Mation):
         self.mations = [mation for mation in mations]
         if len(mations) > 0: #to prevent an empty MationGroup to run into issues with bound updating
             self.update_bounds()
+        else: 
+            self.start = TimeMarker(0, 0, 0)
+            self.end = TimeMarker(0, 0, 0)
         self.fps = fps
-        self.total_frames = None
+        if self.fps is not None: 
+            self.total_frames = self.end.time_as_int(self.fps) - self.start.time_as_int(self.fps) + 1
+        else: 
+            self.total_frames = None
 
     def update_bounds(self): 
         self.start = sorted(self.mations, key=Mation.get_start)[0].get_start()
-        self.start_second = self.start[0]
-        self.start_frame = self.start[1]
-
         self.end = sorted(self.mations, key=Mation.get_end, reverse=True)[0].get_end()
-        self.end_second = self.end[0]
-        self.end_frame = self.end[1]
 
     def tick(self): 
         return MatableGroup(*[mation.tick() for mation in self.mations]) #returns a MatableGroup of returned mations for each ticked mation
@@ -29,8 +31,7 @@ class MationGroup(Mation):
     def __str__(self): 
         string = f"MationGroup of type {self.__class__.__name__}, composed of" 
         for mation in self.mations: 
-            string += f"\n\t Mation of type {mation.__class__.__name__} running from second {mation.get_start()[0]} frame {mation.get_start()[1]} " + \
-            f"to second {mation.get_end()[0]} frame {mation.get_end()[1]}"
+            string += f"\n\t Mation of type {mation.__class__.__name__} running from {self.start} to {self.end}"
         return string
 
     def add(self, *mations): 
@@ -48,10 +49,10 @@ class MationGroup(Mation):
         #because Python uses reference counting along with garbage collection, the mations that don't make it into the new list should
         #get deleted.
     
-    def set_start(self, start_second, start_frame):
+    def set_start(self, start: TimeMarker):
         raise Exception("Setting start and end is not allowed with Mations of type MationGroup.")
     
-    def set_end(self, end_second, end_frame):
+    def set_end(self, end: TimeMarker):
         raise Exception("Setting start and end is not allowed with Mations of type MationGroup.")
 
     def get_mations(self): 

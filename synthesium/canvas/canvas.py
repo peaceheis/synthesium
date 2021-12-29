@@ -1,22 +1,19 @@
 import os
 import os.path
-from synthesium.utils.useful_functions import linear_increase
-from synthesium.matable.shapes import Circle, Triangle
-from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 import subprocess
 
 import numpy
 import cairo
 from cairo import ImageSurface
 
-
-
 from synthesium.utils.imports import *
-from synthesium.matable.primitives import Line, Arc, Curve #Line, Arc, Curve
+from synthesium.matable.primitives import Line, Arc, Curve 
 from synthesium.matable.matable import Matable
 from synthesium.matable.matablegroup import MatableGroup
 from synthesium.mation.mation import Mation
 from synthesium.mation.mationgroup import MationGroup
+from synthesium.utils.useful_functions import linear_increase
+from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 
 class Canvas():  
     """The canvas acts as the entry point between the user and Synthesium. The user creates a class that inherits from Canvas,
@@ -47,7 +44,7 @@ class Canvas():
         self.ctx.rectangle(0, 0, self.width, self.height)
         self.ctx.fill()
 
-    def add_mations(self, *mations): 
+    def add(self, *mations): 
         """calling self.add(mation) doesn't do much besides add it to the list of Mations to be processed. The heavy lifting is done when
         Canvas.write() is called, outside the class definition."""
         for mation in mations: 
@@ -61,7 +58,7 @@ class Canvas():
         """Sorts the mationlist by start frame. It assumes that the Mations have been added, and therefore have
            had their fps set, because otherwise, how would they be in self.mations in the first place?"""
         
-        return sorted(self.mations, key=Mation.get_start_frame)
+        return sorted(self.mations, key=Mation.get_start_as_int)
 
     def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
@@ -69,11 +66,11 @@ class Canvas():
 
         mationlist = self.mations #it's a bit more intuitive to have a separate list
         if not mationlist: 
-            raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add_mation to do so.")
+            raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add to do so.")
 
         def overlap_exists_between(mation1: Mation, mation2: Mation): 
-            return mation2.start_frame() >= mation1.get_start_frame() and mation2.get_start_frame() <= mation1.get_end_frame() 
-             #check if the second mation starts before or when the first mation ends, but starts after or when the first mation starts.
+            return (mation2.get_end() >= mation1.get_start()) or mation2.get_end() >= mation1.get_start()
+             #check if the second mation starts or ends before or when the first mation ends, but starts after or when the first mation starts.
         
         if len(mationlist) == 1:
             return mationlist
@@ -82,7 +79,9 @@ class Canvas():
             mation1 = mationlist[0]
             mation2 = mationlist[1] 
             if overlap_exists_between(mation1, mation2): 
-                return [MationGroup(mation1, mation2, fps=self.fps)]
+                group = MationGroup(mation1, mation2, fps=self.fps)
+                group.set_fps(self.fps)
+                return [group]
             return mationlist
 
         #assumes len 3 or longer
@@ -128,7 +127,7 @@ class Canvas():
             elif len(current_group.get_mations()) == 1: 
                 mationlist.append(*current_group.get_mations()) 
                 current_group = MationGroup(fps=self.fps) 
-            elif len(current_group.get_mations() > 1): 
+            elif len(current_group.get_mations()) > 1: 
                 mationlist.append(current_group) 
                 current_group = MationGroup(mation, fps=self.fps)
         
@@ -162,6 +161,7 @@ class Canvas():
         # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def draw_line(self, line): 
+        print("LINE BEING DRAWN")
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
         self.ctx.new_sub_path()
         self.ctx.move_to(*line.get_point1())

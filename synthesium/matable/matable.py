@@ -87,11 +87,9 @@ class Matable():
         return self
 
     # properties
-    @property
-    def points(self): 
+    def get_points(self): 
         return self.points
 
-    @points.setter
     def set_points(self, *points): 
         self.points = tuple(points)
         return self

@@ -5,38 +5,32 @@ class TimeMarker:
         self.frame = frame
 
     def set(self, **kwargs): 
-        print(kwargs)
+        for attr in kwargs.keys(): 
+            self.__setattr__(attr, kwargs[attr])
 
-    """  @property
-    def minute(self): 
+    def get_minute(self): 
         return self.minute
 
-    @minute.setter
     def set_minute(self, minute): 
         assert type(minute) == int
         self.minute = minute
         return self
 
-    @property
-    def second(self): 
+    def get_second(self): 
         return self.second
     
-
-    @second.setter
     def set_second(self, second: int): 
         assert type(second) == int
         self.second = second
         return self
 
-    @property
-    def frame(self): 
+    def get_frame(self): 
         return self.frame
 
-    @frame.setter
     def set_frame(self, frame: int): 
         assert type(frame) == int
         self.frame = frame
-        return self"""
+        return self
 
     def time_as_tuple(self): 
         return (self.minute, self.second, self.frame)
@@ -92,6 +86,4 @@ class TimeMarker:
         
     def __str__(self): 
         return f"{self.__class__.__name__} at min {self.minute}, sec {self.second}, and frame {self.frame}"
-
-t = TimeMarker(2, 2, 2)
 

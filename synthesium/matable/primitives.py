@@ -7,29 +7,30 @@ from math import pi
 
 from synthesium.utils.imports import *
 from synthesium.matable.matable import Matable
+from synthesium.matable.point import Point
 
 class Line(Matable): 
-    def __init__(self, point1, point2, **kwargs):
+    def __init__(self, point1: Point, point2: Point, **kwargs):
         super().__init__(point1, point2, **kwargs)
 
     def get_point1(self): 
         return self.points[0]
 
-    def set_point1(self, point):
-        self.points[0] = point
+    def set_point1(self, point: Point):
+        self.points.x = point
         return self
 
     def get_point2(self):
-        return self.points[1]
+        return self.points[0]
 
-    def set_point2(self, point):
-        self.point[1] = point
+    def set_point2(self, point: Point):
+        self.point.y = point
         return self
 
 class Arc(Matable): 
-    def __init__(self, center: tuple, radius: int, angle1: int, angle2: int, **kwargs): 
+    def __init__(self, center: Point, radius: int, angle1: int, angle2: int, **kwargs): 
         default_config = {
-            "color": PURE_BLUE #TODO, get rid of the config system. No. Just no.
+            "color": PURE_BLUE 
         }
         self.center = center
         self.radius = radius
@@ -38,49 +39,41 @@ class Arc(Matable):
         self.points = (center, ) #for compatability purposes with the rest of the engine, which assumes all Matables have a tuple attribute called self.points.
         self.config = self.configure(default_config, **kwargs)
         
-    def arc_length(self): 
+    def arc_length(self) -> float: 
         return self.radius*2 * (self.degrees/360) * pi #the arclength formula
 
-    @property
-    def center(self):
+    def get_center(self) -> Point:
         return self.center
 
-    @center.setter
-    def set_center(self, center): 
+    def set_center(self, center: Point): 
         self.center = center
         self.points = (center, )
         return self
 
-    @property
-    def radius(self): 
+    def get_radius(self): 
         return self.radius
 
-    @radius.setter
-    def set_radius(self, radius): 
+    def set_radius(self, radius: Point): 
         self.radius = radius
 
-    def degrees(self): 
+    def get_degrees(self): 
         return abs(self.angle1 - self.angle2)
-    
-    @property
-    def angle1(self): 
+
+    def get_angle1(self): 
         return self.angle1
 
-    @angle1.setter
-    def set_angle1(self, angle): 
+    def set_angle1(self, angle: int): 
         self.angle1 = angle
         return self
 
-    @property
-    def angle2(self): 
+    def get_angle2(self): 
         return self.angle2
 
-    @property.setter
-    def set_angle2(self, angle): 
+    def set_angle2(self, angle: int): 
         self.angle2 = angle
         return self
 
 
 class Curve(Matable):
-    def __init__(self, anchor1, handle1, handle2, anchor2): 
+    def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point): 
         self.points = (anchor1, handle1, handle2, anchor2) #look into bezier curves, namely cubic ones, for info on how this works.
