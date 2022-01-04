@@ -69,7 +69,7 @@ class Canvas():
             raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add to do so.")
 
         def overlap_exists_between(mation1: Mation, mation2: Mation): 
-            return (mation2.get_end() >= mation1.get_start()) or mation2.get_end() >= mation1.get_start()
+            return mation2.get_start() <= mation1.get_end() and mation2.get_start() >= mation1.get_start()
              #check if the second mation starts or ends before or when the first mation ends, but starts after or when the first mation starts.
         
         if len(mationlist) == 1:
@@ -160,8 +160,7 @@ class Canvas():
         # credit to Manim (https://github.com/3b1b/manim). 
         # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
-    def draw_line(self, line): 
-        print("LINE BEING DRAWN")
+    def draw_line(self, line: Line): 
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
         self.ctx.new_sub_path()
         self.ctx.move_to(*line.get_point1())
@@ -169,14 +168,17 @@ class Canvas():
         self.ctx.stroke_preserve()
         self.ctx.fill() #5b
 
-    def draw_arc(self, arc): 
+    def draw_arc(self, arc: Arc): 
         self.ctx.set_source_rgba(*arc.config["color"])
         self.ctx.new_sub_path()
-        self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
+        if arc.negative: 
+            self.ctx.arc_negative(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
+        else: 
+            self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         self.ctx.stroke_preserve()
         self.ctx.fill() #5c
 
-    def draw_curve(self, curve):
+    def draw_curve(self, curve: Curve):
         self.ctx.set_source_rgba(*curve.config["color"])
         self.ctx.new_sub_path()
         self.ctx.move_to(*curve.get_points()[0])
@@ -197,22 +199,35 @@ class Canvas():
         for curve in to_be_drawn: 
             self.draw_curve(curve)
 
+    def draw_vector_matables(self, matable): 
+        #MatableGroup handling
+        if isinstance(matable, MatableGroup): 
+            self.draw_matable_group(matable) #5b
+            return True
+
+        elif isinstance(matable, Line): 
+            self.draw_line(matable) #5c
+            return True 
+
+        elif isinstance(matable, Arc): 
+            self.draw_arc(matable) #5d
+            return True
+
+        elif isinstance(matable, Curve): 
+            self.draw_curve(matable) #5e
+            return True
+
+        else: 
+            return False
+
     def save(self, end_dir: str): 
         """This is where all the rendering work gets done. The steps are as follows:
                 1. The mation list is constructed (by calling the user-defined construct()), and sorted by start frame,
                 2. A compressed list where any overlapping Mations are made into a MationGroup is generated,
                 3. After verification of the end directory, a pipe is opened to ffmpeg to string together all the frames.
-                Then things get interesting. 
-                5. The animation gets rendered via loop: 
-                    5a. Make the animation progress 1 frame.
-                    For every matable returned by a Mation: 
-                        5b. If it's a MatableGroup, break it down into its components and draw them.
-                        5c. If it's a Line, draw it.
-                        5d. If it's an Arc, draw it.
-                        5e. If it's a Curve, draw it.
-                    5f. Raise an exception if the returned matable fits none of the cases from 5b - 5e.
-                    5g. The context drawing the Matables gets converted to a NumPy pixel array to be added to the pipe.
-                    5h. The pixel array is written to the pipe.
+                5. The animation then gets rendered via loop: 
+                    5a. Make the animation progress 1 frame, and get all the matables to be drawn in that frame.
+                    5b. Break them down, and render the primitives Line, Arc, and Curve.
                 6. The video is written."""
 
         if len(self.mations) == 0: 
@@ -223,30 +238,20 @@ class Canvas():
 
         for mation in self.mations: 
             print(f"Processing mation {mation}")
+            if(mation.should_call_pre_tick): 
+                    mation.pre_tick()
             for _ in mation.get_range_of_frames(): #5
+                print(f"processing frame {mation.current_frame}")
                 matable = mation.tick() #5a.
-                #MatableGroup handling
-                if isinstance(matable, MatableGroup): 
-                    self.draw_matable_group(matable) #5b
-
-                elif isinstance(matable, Line): 
-                    self.draw_line(matable) #5c 
-
-                elif isinstance(matable, Arc): 
-                    self.draw_arc(matable) #5d
-
-                elif isinstance(matable, Curve): 
-                    self.draw_curve(matable) #5e
-
-                else: 
-                    raise Exception(f"The Matable returned by the tick method of mation {mation} is neither a MatableGroup, or a Primitive, and thus can't be drawn.") #5f
-                    #should this be a warning?
-
+                valid = self.draw_vector_matables(matable) #5b
+                if not valid: 
+                    raise Exception(f"Matable {matable} returned by mation {mation} not drawable.")
+                
                 width, height = self.get_dimensions()
                 buf = self.surface.get_data()
                 data = numpy.ndarray(shape=(height, width), 
-                     dtype=numpy.uint32,
-                     buffer=buf)
+                    dtype=numpy.uint32,
+                    buffer=buf)
                 self.pipe.stdin.write(data.tobytes()) #5g.
 
                 self.initialize_surface()

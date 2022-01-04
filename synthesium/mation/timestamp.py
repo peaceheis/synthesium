@@ -1,4 +1,4 @@
-class TimeMarker: 
+class TimeStamp: 
     def __init__(self, minute:int=0, second:int=0, frame:int=0): 
         self.minute = minute
         self.second = second
@@ -38,7 +38,7 @@ class TimeMarker:
     def time_as_int(self, fps): 
         return self.minute * 60 * fps + self.second * fps + self.frame
 
-    def __gt__(self, marker: "TimeMarker"): 
+    def __gt__(self, marker: "TimeStamp"): 
         if self.minute > marker.minute: 
             return True
         elif self.minute == marker.minute: 
@@ -49,10 +49,10 @@ class TimeMarker:
                     return True
         return False
 
-    def is_after(self, marker: "TimeMarker"): 
+    def is_after(self, marker: "TimeStamp"): 
         return self.__gt__(marker)
 
-    def __lt__(self, marker: "TimeMarker"): 
+    def __lt__(self, marker: "TimeStamp"): 
         if self.minute < marker.minute: 
             return True
         elif self.minute == marker.minute: 
@@ -63,25 +63,25 @@ class TimeMarker:
                     return True
         return False
 
-    def is_before(self, marker: "TimeMarker"): 
+    def is_before(self, marker: "TimeStamp"): 
         return self.__lt__(marker)
 
-    def __eq__(self, marker: "TimeMarker"): 
+    def __eq__(self, marker: "TimeStamp"): 
         return self.minute == marker.minute and self.second == marker.second and self.frame == marker.frame
 
-    def is_equal_to(self, marker: "TimeMarker"): 
+    def is_equal_to(self, marker: "TimeStamp"): 
         return self.__eq__(marker)
 
-    def __ge__(self, marker: "TimeMarker"): 
+    def __ge__(self, marker: "TimeStamp"): 
         return self.__gt__(marker) or self.__eq__(marker)
 
-    def is_equal_to_or_after(self, marker: "TimeMarker"): 
+    def is_equal_to_or_after(self, marker: "TimeStamp"): 
         return self.__ge__(marker)
 
-    def __le__(self, marker: "TimeMarker"): 
+    def __le__(self, marker: "TimeStamp"): 
         return self.__lt__(marker) or self.__eq__(marker)
 
-    def is_equal_to_or_before(self, marker: "TimeMarker"): 
+    def is_equal_to_or_before(self, marker: "TimeStamp"): 
         return self.__le__(self, marker)
         
     def __str__(self): 

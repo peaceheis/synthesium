@@ -1,12 +1,12 @@
-from synthesium.mation.timemarker import TimeMarker
+from synthesium.mation.timestamp import TimeStamp
 
 def test(): 
     test_comparisons()
 
 def test_comparisons():
-    less = TimeMarker(1, 3, 2)
-    more = TimeMarker(2, 2, 4)
-    base = TimeMarker(2, 0, 1)
+    less = TimeStamp(1, 3, 2)
+    more = TimeStamp(2, 2, 4)
+    base = TimeStamp(2, 0, 1)
 
     assert less < base 
     assert more > base

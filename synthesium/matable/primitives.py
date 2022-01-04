@@ -28,15 +28,16 @@ class Line(Matable):
         return self
 
 class Arc(Matable): 
-    def __init__(self, center: Point, radius: int, angle1: int, angle2: int, **kwargs): 
+    def __init__(self, center: Point, radius: int, angle1: int, angle2: int, negative=False, **kwargs): 
         default_config = {
             "color": PURE_BLUE 
         }
         self.center = center
         self.radius = radius
         self.angle1 = angle1
-        self.angle2 = angle2 
+        self.angle2 = angle2
         self.points = (center, ) #for compatability purposes with the rest of the engine, which assumes all Matables have a tuple attribute called self.points.
+        self.negative = negative
         self.config = self.configure(default_config, **kwargs)
         
     def arc_length(self) -> float: 
