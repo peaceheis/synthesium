@@ -21,7 +21,7 @@ class Line(Matable):
         return self
 
     def get_point2(self):
-        return self.points[0]
+        return self.points[1]
 
     def set_point2(self, point: Point):
         self.point.y = point

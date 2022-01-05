@@ -40,9 +40,8 @@ class MationGroup(Mation):
             mation.pre_tick()
 
     def tick(self): 
-        self.current_frame += 1 #TODO fool! You didn't implement current_frame for Groups!
-        return MatableGroup(*[mation.tick() for mation in self.mations]) #returns a MatableGroup of returned mations for each ticked mation
-
+        self.current_frame += 1 
+        return MatableGroup(*[mation.tick() for mation in self.mations if mation.is_active_at_frame(self.current_frame)]) #returns a MatableGroup of returned mations for each ticked mation
     def __str__(self): 
         string = f"MationGroup of type {self.__class__.__name__}, composed of" 
         for mation in self.mations: 
@@ -61,7 +60,11 @@ class MationGroup(Mation):
         """Remove Mations from the mation list"""
         self.mations = [mation for mation in self.mations if mation not in mations] #regenerate mationlist without the mations in the list.
         self.update_bounds()
-        
+    
+    def set_fps(self, fps): 
+        super().set_fps(fps)
+        for mation in self.mations: 
+            mation.set_fps(fps)
     
     def set_start(self, start: TimeStamp):
         raise Exception("Setting start and end is not allowed with Mations of type MationGroup.")

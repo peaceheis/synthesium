@@ -26,6 +26,12 @@ class Mation:
         else: 
             self.total_frames = None
 
+    def overlaps(self, mation: "Mation"): 
+            return  mation.get_start() <= self.get_end() and mation.get_start() >= self.get_start() \
+            or  \
+            self.get_start() <= mation.get_end() and self.get_end() >= mation.get_start()
+            # check if the second mation starts or ends before or when the first mation ends, but starts after or when the first mation starts, or vice versa.
+
     def tick(self) -> Matable:
         """Tick gets called by Canvas to make the mation advance by one frame: tick updates the `target` Matable, and updates 
         the attribute self.current_frame, which is initialized ONLY after set_fps is called by Canvas, by the amount returned by the rate_function."""
@@ -68,6 +74,9 @@ class Mation:
 
     def get_range_of_frames(self): #mostly for internal use
         return range(self.total_frames)
+
+    def is_active_at_frame(self, frame): 
+        return self.start.time_as_int(self.fps) <= frame and self.end.time_as_int(self.fps) >= frame
 
     def validate_runtimes(self, start: TimeStamp, end: TimeStamp): 
         class InvalidRuntimeError(Exception): #here in the case an invalid runtime is encountered, i.e, end time < start time.

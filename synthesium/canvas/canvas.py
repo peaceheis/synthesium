@@ -8,11 +8,9 @@ from cairo import ImageSurface
 
 from synthesium.utils.imports import *
 from synthesium.matable.primitives import Line, Arc, Curve 
-from synthesium.matable.matable import Matable
 from synthesium.matable.matablegroup import MatableGroup
 from synthesium.mation.mation import Mation
 from synthesium.mation.mationgroup import MationGroup
-from synthesium.utils.useful_functions import linear_increase
 from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 
 class Canvas():  
@@ -148,7 +146,7 @@ class Canvas():
             '-s', str(self.frame_width) + 'x' + str(self.frame_height),  # size of one frame
             '-pix_fmt', 'rgba',
             '-r', str(self.fps),  # frames per second
-            '-i', '-',  # The imput comes from a pipe
+            '-i', '-',  # The input comes from a pipe
             '-an',  # Tells FFMPEG not to expect any audio
             '-loglevel', 'error',
             '-vcodec', 'libx264',
@@ -163,8 +161,8 @@ class Canvas():
     def draw_line(self, line: Line): 
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
         self.ctx.new_sub_path()
-        self.ctx.move_to(*line.get_point1())
-        self.ctx.line_to(*line.get_point2()) 
+        self.ctx.move_to(*line.get_point1().as_tuple())
+        self.ctx.line_to(*line.get_point2().as_tuple()) 
         self.ctx.stroke_preserve()
         self.ctx.fill() #5b
 
@@ -172,17 +170,17 @@ class Canvas():
         self.ctx.set_source_rgba(*arc.config["color"])
         self.ctx.new_sub_path()
         if arc.negative: 
-            self.ctx.arc_negative(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
+            self.ctx.arc_negative(*arc.get_center().as_tuple(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         else: 
-            self.ctx.arc(*arc.get_center(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
+            self.ctx.arc(*arc.get_center().as_tuple(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         self.ctx.stroke_preserve()
         self.ctx.fill() #5c
 
     def draw_curve(self, curve: Curve):
         self.ctx.set_source_rgba(*curve.config["color"])
         self.ctx.new_sub_path()
-        self.ctx.move_to(*curve.get_points()[0])
-        self.ctx.curve_to(*curve.get_points()[0], *curve.get_points()[1], *curve.get_points()[2], *curve.get_points()[3]) 
+        self.ctx.move_to(*curve.get_points()[0].as_tuple())
+        self.ctx.curve_to(*curve.get_points()[0].as_tuple(), *curve.get_points()[1].as_tuple(), *curve.get_points()[2].as_tuple(), *curve.get_points()[3].as_tuple()) 
         self.ctx.stroke_preserve()
         self.ctx.fill() #5d
 

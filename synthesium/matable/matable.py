@@ -1,23 +1,24 @@
 from math import sqrt
-from collections import namedtuple
+
+from numpy import true_divide
 
 from synthesium.utils.useful_functions import *
 from synthesium.utils.imports import * 
-
-Point = namedtuple('Point', ['x', 'y'])
+from synthesium.matable.point import Point
 
 class Matable(): 
     """Short for Animatable Object, a Matable is designed to hold points, 
     which are named tuples of coordinate pairs, and instructions on how to connect them.
-    For simple reference, both point[0] and point.x will mean the x-value of a point, and point[1]/point.y means the y-value."""
-    def __init__(self, *points: "Union[tuple[Point], list[Point]]", **kwargs: "dict[str, Any]"): 
-        default_config = {
+    For simple reference, both point.x and point.x will mean the x-value of a point, and point.y/point.y means the y-value."""
+    def __init__(self, *points: "Union[tuple[Point], list[Point]]", color_stops = [], **kwargs: "dict[str, Any]"): 
+        config = {
             "color": PURE_BLUE,
             "fill_color": PURE_BLUE,
         } 
 
         self.points = tuple(points) #tuples require less memory space, and points generally shouldn't be changing in terms of length.
-        self.config = self.configure(default_config, **kwargs)
+        self.color_stops = color_stops
+        self.config = self.configure(config, **kwargs)
 
     def configure(self, default_config, **kwargs): 
         """Configure works by taking in all the kwargs passed to init(), and comparing them against the default config. Anything new is updated, 
@@ -28,62 +29,13 @@ class Matable():
         
 
     # movement functions
-    def rotate(self, degrees, center, rotates_clockwise = True): 
-        """
-        A bit confusing, but rotate uses math to calculate the rotation of a Point around another (henceforth known as the Anchor).
-        This is achieved by first setting the Anchor as the "origin" by changing the point's coords
-        to the relative x + y distance to the Anchor,
-        Then converting from Rectangular to Polar coordinates; they are designed to be good for rotation.
-        After adding the desired degrees to the Polar coordinates,
-        We convert back to Rectangular coordinates,
-        And shift back so that the origin is the origin, not the Anchor.
-        """
-        from math import sin, cos, atan, pi
-        self.points = list(*self.points)
-
+    def rotate(self, degrees, center: Point, rotates_clockwise = True): 
         for point in self.points: 
-            point = list(*point)
-            # set Anchor to be origin 
-            point[0] -= center[0]
-            point[1] -= center[1]
-
-            # generating polar coordinates
-            radius = sqrt(point[0]**2 + point[1]**2)
-            try : 
-                angle = atan(point[1] / point[0])
-            except :
-                # prevent errors from being thrown if x == 0 
-                if abs(point[1]) == point[1] : 
-                    angle = pi / 2
-                else : 
-                    angle = 3 * pi / 2
-
-            # rotates by adding the angle (in radians)
-            radians = pi * degrees / 180
-            if rotates_clockwise : 
-                angle -= radians
-            else :     
-                angle += radians
-
-            # convert back to rectangular coordinates
-            point[0] = round(radius * cos(angle), 5)
-            point[1] = round(radius * sin(angle), 5) 
-
-            # shift back from center being origin to original location
-            point[0] += center[0]
-            point[1] += center[1]
-            point = tuple(point)
-        self.points = tuple(self.points)
-        return self
+            point.rotate(degrees, center, rotates_clockwise)
             
     def shift(self, amt: tuple):
-        """Shifts are done by adding a tuple of length 4, with each value corresponding to right, left, up, and down movement."""
-        new_point_list = [] # temp list to hold new points
-        for point in self.points: 
-            new_x_value = point[0] + amt[0] - amt[1] # c alculate shifted x-coord
-            new_y_value = point[1] + amt[2] - amt[3] # calculate shifted y-coord
-            new_point_list.append((new_x_value, new_y_value))
-        self.points = tuple(new_point_list)
+        """Shifts are done by adding a tuple of length 2, in the form (x movement, y movement). Use negatives for left and down, respectively."""
+        self.points = tuple([point.shift(amt) for point in self.points])
         return self
 
     # properties
