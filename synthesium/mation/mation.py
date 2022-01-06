@@ -27,7 +27,7 @@ class Mation:
             self.total_frames = None
 
     def overlaps(self, mation: "Mation"): 
-            return  mation.get_start() <= self.get_end() and mation.get_start() >= self.get_start() \
+            return mation.get_start() <= self.get_end() and mation.get_start() >= self.get_start() \
             or  \
             self.get_start() <= mation.get_end() and self.get_end() >= mation.get_start()
             # check if the second mation starts or ends before or when the first mation ends, but starts after or when the first mation starts, or vice versa.
@@ -82,7 +82,7 @@ class Mation:
         class InvalidRuntimeError(Exception): #here in the case an invalid runtime is encountered, i.e, end time < start time.
                 def __init__(self):
                     super().__init__(f"Beginning time was set to {start}, \
-                                       but end time was set to {end}")
+                                        but end time was set to {end}")
         if not start < end: 
             raise InvalidRuntimeError()
     
@@ -93,4 +93,4 @@ class Mation:
         return f"Mation of type {type(self)}"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.target}, {self.start_second}, {self.start_frame}, {self.end_second}, {self.get_end_in_frame_form})"
+        return f"{self.__class__.__name__}"

@@ -14,6 +14,7 @@ class Matable():
         config = {
             "color": PURE_BLUE,
             "fill_color": PURE_BLUE,
+            "line_width": 10
         } 
 
         self.points = tuple(points) #tuples require less memory space, and points generally shouldn't be changing in terms of length.

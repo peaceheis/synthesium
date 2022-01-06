@@ -26,6 +26,7 @@ class Canvas():
         self.fps = fps
         self.width, self.height = canvas_size #canvas size is the size of the canvas in which everything will be drawn...
         self.frame_width, self.frame_height = frame_size #...frame size is the size of the output video. this allows for things like panning cameras.
+        self.count = 0
 
         #cairo things
         self.surface = ImageSurface(cairo.Format.ARGB32, self.width, self.height)
@@ -43,97 +44,26 @@ class Canvas():
         self.ctx.fill()
 
     def add(self, *mations): 
+        self.count += 1
         """calling self.add(mation) doesn't do much besides add it to the list of Mations to be processed. The heavy lifting is done when
         Canvas.write() is called, outside the class definition."""
         for mation in mations: 
             mation.set_fps(self.fps)
             self.mations.append(mation)
 
-
     #auxiliary functions to save()
 
     def sort_mationlist(self):
-        """Sorts the mationlist by start frame. It assumes that the Mations have been added, and therefore have
-           had their fps set, because otherwise, how would they be in self.mations in the first place?"""
+        """Sorts the mationlist by start frame. It assumes that the Mations have been add()ed, and therefore have
+           had their fps set."""
         
         return sorted(self.mations, key=Mation.get_start_as_int)
 
     def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
-
-        mationlist = self.mations #it's a bit more intuitive to have a separate list
-        if not mationlist: 
-            raise Exception(f"No mations were provided to Canvas {self.__class__.__name__}, use add to do so.")
-
-        def overlap_exists_between(mation1: Mation, mation2: Mation): 
-            return mation2.get_start() <= mation1.get_end() and mation2.get_start() >= mation1.get_start()
-             #check if the second mation starts or ends before or when the first mation ends, but starts after or when the first mation starts.
-        
-        if len(mationlist) == 1:
-            return mationlist
-
-        if len(mationlist) == 2:
-            mation1 = mationlist[0]
-            mation2 = mationlist[1] 
-            if overlap_exists_between(mation1, mation2): 
-                group = MationGroup(mation1, mation2, fps=self.fps)
-                group.set_fps(self.fps)
-                return [group]
-            return mationlist
-
-        #assumes len 3 or longer
-        merged_list = []
-        current_group = MationGroup(fps=self.fps)
-        #check the first entry for overlap 
-        mation1 = mationlist[0]
-        mation2 = mationlist[1]
-        if overlap_exists_between(mation1, mation2):
-            current_group.add(mation1) #the second will be added during the loop
-        else: #no overlap
-            merged_list.append(mation1)
-
-        for i in range(len(mationlist)-2): #exclude first and last mations
-            before = mationlist[i]
-            mation = mationlist[i+1]
-            after = mationlist[i+2]
-
-            if overlap_exists_between(before, mation): 
-                current_group.add(mation)
-            
-            elif overlap_exists_between(mation, after): #a new group should be probably be started in this case, but to be sure:
-                if len(current_group.get_mations()) == 0: #no point in packaging an empty list, and in fact it'll break things.
-                    pass #there's no need to reset current_group, it's already initialized.
-                elif len(current_group.get_mations()) == 1: #if there's one, just add the contained Mation - no unnecessary MationGroups stealing memory.
-                    mationlist.append(*current_group.get_mations()) 
-                    current_group = MationGroup(fps=self.fps) #reset the group with the current mation.
-                elif len(current_group.get_mations() > 1): 
-                    mationlist.append(current_group) 
-                    current_group = MationGroup(mation, fps=self.fps) 
-                    #if the group is longer than 1, add the group to the list and start a new one with the current mation.
-            
-            else: #no overlap, this Mation's quite the special little snowflake innit?
-                mationlist.append(mation)
-    
-        #last mation handling: 
-        before = mationlist[-2]
-        mation = mationlist[-1] 
-        #see above for explanations
-        if overlap_exists_between(before, mation): 
-            if len(current_group.get_mations()) == 0: 
-                pass
-            elif len(current_group.get_mations()) == 1: 
-                mationlist.append(*current_group.get_mations()) 
-                current_group = MationGroup(fps=self.fps) 
-            elif len(current_group.get_mations()) > 1: 
-                mationlist.append(current_group) 
-                current_group = MationGroup(mation, fps=self.fps)
-        
-        #lastly, handle packaging of the final group
-        if not len(current_group.get_mations()) == 0: 
-            mationlist.append(current_group)
-
-        return mationlist #all done
+        print(self.mations)
+        return self.mations #TODO write a functioning mation merging method
 
     def open_pipe_for_rendering(self, end_dir): 
         if not os.path.exists(os.path.split(end_dir)[0]):
@@ -160,28 +90,34 @@ class Canvas():
 
     def draw_line(self, line: Line): 
         self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
+        self.ctx.set_line_width(line.config["line_width"])
         self.ctx.new_sub_path()
         self.ctx.move_to(*line.get_point1().as_tuple())
         self.ctx.line_to(*line.get_point2().as_tuple()) 
         self.ctx.stroke_preserve()
+        self.ctx.set_source_rgba(*line.config["fill_color"])
         self.ctx.fill() #5b
 
     def draw_arc(self, arc: Arc): 
         self.ctx.set_source_rgba(*arc.config["color"])
+        self.ctx.set_line_width(arc.config["line_width"])
         self.ctx.new_sub_path()
         if arc.negative: 
             self.ctx.arc_negative(*arc.get_center().as_tuple(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         else: 
             self.ctx.arc(*arc.get_center().as_tuple(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         self.ctx.stroke_preserve()
+        self.ctx.set_source_rgba(*arc.config["fill_color"])
         self.ctx.fill() #5c
 
     def draw_curve(self, curve: Curve):
         self.ctx.set_source_rgba(*curve.config["color"])
+        self.ctx.set_line_width(curve.config["line_width"])
         self.ctx.new_sub_path()
         self.ctx.move_to(*curve.get_points()[0].as_tuple())
         self.ctx.curve_to(*curve.get_points()[0].as_tuple(), *curve.get_points()[1].as_tuple(), *curve.get_points()[2].as_tuple(), *curve.get_points()[3].as_tuple()) 
         self.ctx.stroke_preserve()
+        self.ctx.set_source_rgba(*curve.config["fill_color"])
         self.ctx.fill() #5d
 
     def draw_matable_group(self, mgroup: MatableGroup):

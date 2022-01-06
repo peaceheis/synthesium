@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Point:
-    x: int = field(default='one')
-    y: int = field(default=1)
+    x: int = field(default=0)
+    y: int = field(default=0)
 
     def as_tuple(self): 
         return self.x, self.y

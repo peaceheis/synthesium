@@ -2,7 +2,7 @@
 Rendering in Synthesium (should) reduce everything to these. The reason for these primitives is to have a one to one match for the drawing functions
 in cairo, line_to(), curve_to(), and arc(). By doing this, all other shapes can be defined as MatableGroups, which have different combinations of these primitives."""
 
-from synthesium.utils.colors import PURE_BLUE
+from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_BLUE
 from math import pi
 
 from synthesium.utils.imports import *
@@ -30,7 +30,9 @@ class Line(Matable):
 class Arc(Matable): 
     def __init__(self, center: Point, radius: int, angle1: int, angle2: int, negative=False, **kwargs): 
         default_config = {
-            "color": PURE_BLUE 
+            "color": PURE_BLUE,
+            "fill_color": HALF_OPAQUE_RED,
+            "line_width": 10
         }
         self.center = center
         self.radius = radius

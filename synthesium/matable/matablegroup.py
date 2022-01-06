@@ -8,7 +8,9 @@ class MatableGroup(Matable):
     """Enables multiple Matables (such as the primitives Line, Arc, and Curve), to make what functions as one Matable."""
     def __init__(self, *matables: Union[tuple, list], **kwargs): 
         self.matables = matables
-        self.points = [matable.get_points() for matable in matables] #recursively adds points
+        self.points = []
+        for matable in matables: 
+            self.points.extend(matable.get_points())
         self.configure(kwargs)
 
     def add_matable(self, matable: Matable) -> "MatableGroup": 
