@@ -50,6 +50,16 @@ class Matable():
     def num_points(self): 
         return len(self.points)
 
+    def get_color(self): 
+        return self.config["color"]
+
+    def set_color(self, color: "tuple | list"): 
+        assert len(color) == 4
+        for color_ in color: 
+            assert 0 < color_ and color_ < 1
+
+        self.color = color
+
     def __repr__(self): 
         return f"Matable of type {self.__class__.__name__} consisting of points {self.points}" #TODO, make better REPR
         

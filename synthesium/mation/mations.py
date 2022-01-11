@@ -5,13 +5,13 @@ from synthesium.matable.matable import Matable
 from synthesium.matable.point import Point
 
 """some predefined Mations"""
-#TODO sort these into folders, and write some more Mations
+#TODO sort these into folders
 class Show(Mation): 
     def __init__(self, target: Matable, start: TimeStamp, end: TimeStamp, rate_func=constant): 
         super().__init__(target, start, end, rate_func=rate_func)
 
     def tick(self): 
-        self.current_frame += 1
+        super().tick()
         return self.target
 
 class Move(Mation):
@@ -21,9 +21,9 @@ class Move(Mation):
         self.amount = amount
 
     def tick(self): 
+        super().tick()
         single_frame_amount = [amt/self.total_frames for amt in self.amount]
         adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in single_frame_amount]
-        self.current_frame += 1
         return self.target.shift(tuple(adjusted_frame_amount))
 
 class Rotate(Mation): 
@@ -34,7 +34,7 @@ class Rotate(Mation):
         self.rotates_clockwise = rotates_clockwise
 
     def tick(self): 
-        self.current_frame += 1
+        super().tick()
         self.target.rotate(self.degrees/self.total_frames * self.rate_func(self.current_frame, self.total_frames), self.center, rotates_clockwise=self.rotates_clockwise)
         return self.target
 
@@ -45,10 +45,10 @@ class MovePoint(Mation):
         self.point_index = point_index
         self.amount = amount
 
-    def tick(self): 
+    def tick(self):
+        super().tick
         single_frame_amount = [amt/self.total_frames for amt in self.amount]
         adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in single_frame_amount]
-        self.current_frame += 1
         self.target.points[self.point_index].shift(tuple(adjusted_frame_amount))
         return self.target
 
@@ -64,12 +64,24 @@ class Transform(Mation):
         # initialization occurs right before ticking starts. This allows multiple Transforms to target the same Matable
         # as long as they aren't concurrent.
 
-        self.start_attribute = getattr(self.target, self.attribute)
-        self.difference = self.end_attribute - self.start_attribute
+        start_attribute = getattr(self.target, self.attribute)
+        self.difference = self.end_attribute - start_attribute
 
     def tick(self):
+        super().tick()
         self.target.__setattr__(self.attribute, getattr(self.target,self.attribute) + self.difference/self.total_frames * self.rate_func(self.current_frame, self.total_frames))
-        self.current_frame += 1
         return self.target
 
+class ChangeOpacity(Mation): 
+    def __init__(self, target: Matable, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant): 
+        super().__init__(target, start, end, rate_func)
+        assert 0 <= opacity and opacity <= 1
+        self.opacity = opacity
+        self.should_call_pre_tick = True
 
+    def pre_tick(self): 
+        start_color = self.target.get_color()
+        self.difference = self.opacity - start_color
+
+    def tick(self):  
+        self.target.set_color(*self.start_color[0:3], self.color[3] + self.difference/self.total_frames * self.rate_func(self.current_frame, self.total_frames))
