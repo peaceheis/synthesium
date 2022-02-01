@@ -39,7 +39,7 @@ class Canvas():
     def initialize_surface(self): 
         #initialize background color
         self.ctx.move_to(0, 0)
-        self.ctx.set_source_rgba(*self.background_color[:3], self.background_color[3])
+        self.ctx.set_source_rgba(*reversed(self.background_color[0:3]), self.background_color[3])
         self.ctx.rectangle(0, 0, self.width, self.height)
         self.ctx.fill()
 
@@ -89,17 +89,17 @@ class Canvas():
         # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def draw_line(self, line: Line): 
-        self.ctx.set_source_rgba(*line.config["color"]) #TODO, implement full customization for context
+        self.ctx.set_source_rgba(*reversed(line.config["color"][0:3]), line.config["color"][3]) #TODO, implement full customization for context
         self.ctx.set_line_width(line.config["line_width"])
         self.ctx.new_sub_path()
         self.ctx.move_to(*line.get_point1().as_tuple())
         self.ctx.line_to(*line.get_point2().as_tuple()) 
         self.ctx.stroke_preserve()
-        self.ctx.set_source_rgba(*line.config["fill_color"])
+        self.ctx.set_source_rgba(*reversed(line.config["fill_color"][0:3]), line.config["fill_color"][3])
         self.ctx.fill() #5b
 
     def draw_arc(self, arc: Arc): 
-        self.ctx.set_source_rgba(*arc.config["color"])
+        self.ctx.set_source_rgba(*reversed(arc.config["color"][0:3]), arc.config["color"][3])
         self.ctx.set_line_width(arc.config["line_width"])
         self.ctx.new_sub_path()
         if arc.negative: 
@@ -107,17 +107,17 @@ class Canvas():
         else: 
             self.ctx.arc(*arc.get_center().as_tuple(), arc.get_radius(), arc.get_angle1(), arc.get_angle2()) 
         self.ctx.stroke_preserve()
-        self.ctx.set_source_rgba(*arc.config["fill_color"])
+        self.ctx.set_source_rgba(*reversed(arc.config["fill_color"][0:3]), arc.config["fill_color"][3])
         self.ctx.fill() #5c
 
     def draw_curve(self, curve: Curve):
-        self.ctx.set_source_rgba(*curve.config["color"])
+        self.ctx.set_source_rgba(*reversed(curve.config["color"][0:3]), curve.config["color"][3])
         self.ctx.set_line_width(curve.config["line_width"])
         self.ctx.new_sub_path()
         self.ctx.move_to(*curve.get_points()[0].as_tuple())
         self.ctx.curve_to(*curve.get_points()[0].as_tuple(), *curve.get_points()[1].as_tuple(), *curve.get_points()[2].as_tuple(), *curve.get_points()[3].as_tuple()) 
         self.ctx.stroke_preserve()
-        self.ctx.set_source_rgba(*curve.config["fill_color"])
+        self.ctx.set_source_rgba(*reversed(curve.config["fill_color"][0:3]), curve.config["fill_color"][3])
         self.ctx.fill() #5d
 
     def draw_matable_group(self, mgroup: MatableGroup):
