@@ -50,16 +50,84 @@ class Matable():
     def num_points(self): 
         return len(self.points)
 
+    def set_red(self, val):
+        assert 0 <= val and val <= 1
+        self.config["color"][0] = val
+    
+    def set_red_fill(self, val):
+        assert 0 <= val and val <= 1
+        self.config["fill_color"][0] = val
+
+    def get_red(self):
+        return self.config["color"][0]
+
+    def get_red_fill(self):
+        return self.config["fill_color"][0]
+    
+    def set_green(self, val): 
+        assert 0 <= val and val <= 1
+        self.config["color"][1] = val
+
+    def set_green_fill(self, val): 
+        assert 0 <= val and val <= 1
+        self.config["fill_color"][1] = val
+
+    def get_green(self):
+        return self.config["color"][1]
+
+    def get_green_fill(self):
+        return self.config["fill_color"][1]
+    
+    def set_blue(self, val):
+        assert 0 <= val and val <= 1
+        self.config["color"][2] = val
+
+    def set_blue_fill(self, val):
+        assert 0 <= val and val <= 1
+        self.config["fill_color"][2] = val
+
+    def get_blue(self): 
+        return self.config["color"][2]
+        
+    def get_blue_fill(self): 
+        return self.config["fill_color"][2]
+
+    def set_opacity(self, val): 
+        assert 0 <= val and val <= 1
+        self.config["color"][3] = val
+
+    def set_opacity_fill(self, val): 
+        assert 0 <= val and val <= 1
+        self.config["fill_color"][3] = val
+
+    def get_opacity(self):
+        return self.config["color"][3]
+
+    def get_opacity_fill(self):
+        return self.config["fill_color"][3]
+
     def get_color(self): 
         return self.config["color"]
 
-    def set_color(self, color: "tuple | list"): 
+    def get_color_fill(self): 
+        return self.config["fill_color"]
+
+    def set_color(self, *color: "tuple | list"): 
         assert len(color) == 4
         for color_ in color: 
-            assert 0 < color_ and color_ < 1
+            assert 0 <= color_ and color_ <= 1
 
-        self.color = color
+        self.config["color"] = list(color)
 
+ 
+
+    def set_fill_color(self, *color: "tuple | list"): 
+        assert len(color) == 4
+        for color_ in color: 
+            assert 0 <= color_ and color_ <= 1
+
+        self.config["color"] = list(color)
+        
     def __repr__(self): 
         return f"Matable of type {self.__class__.__name__} consisting of points {self.points}" #TODO, make better REPR
         
