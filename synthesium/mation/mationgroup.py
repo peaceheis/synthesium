@@ -1,9 +1,7 @@
 from synthesium.mation.timestamp import TimeStamp
 from synthesium.matable.matablegroup import MatableGroup
-from synthesium.mation import mation
 from synthesium.utils.imports import *
 from synthesium.mation.mation import Mation
-
 
 class MationGroup(Mation): 
     """a Mation composed of Mations, used internally with Canvas so that it only has to process one Mation at a time, which simplifies a lot of logic."""
@@ -78,4 +76,17 @@ class MationGroup(Mation):
     def __repr__(self) -> str:
         return self.__str__() #TODO create MationGroup repr
 
-    
+class SameTargetGroup(MationGroup): 
+    """For when you want multiple Mations to target the same Matable."""
+
+    def __init__(self, target, *mations, fps=None): 
+        super().__init__(*mations, fps=fps)
+        self.target = target
+
+    def tick(self): 
+        self.current_frame += 1 
+        for mation in self.mations: 
+            if mation.is_active_at_frame(self.current_frame):
+                mation.tick()
+
+        return self.target

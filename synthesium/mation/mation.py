@@ -1,7 +1,5 @@
 
 import copy
-import warnings
-from collections import namedtuple
 
 from synthesium.mation.timestamp import TimeStamp
 from synthesium.matable.matable import *
