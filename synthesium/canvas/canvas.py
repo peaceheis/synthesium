@@ -62,8 +62,7 @@ class Canvas():
     def merge_mations(self):
         """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
            Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
-        print(self.mations)
-        return self.mations #TODO write a functioning mation merging method
+        return [MationGroup(*self.mations, fps=self.fps)] #TODO write a functioning mation merging method
 
     def open_pipe_for_rendering(self, end_dir): 
         if not os.path.exists(os.path.split(end_dir)[0]):

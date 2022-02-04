@@ -15,8 +15,8 @@ class Circle(Arc):
     
     def shift(self, amt: tuple):
         center: Point = self.center
-        new_x_value = center.x + amt[0] - amt[1]
-        new_y_value = center.y + amt[2] - amt[3]
+        new_x_value = center.x + amt[0]
+        new_y_value = center.y + amt[1]
         self.center = Point(new_x_value, new_y_value)
         return self
 
