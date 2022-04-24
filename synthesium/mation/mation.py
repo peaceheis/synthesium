@@ -1,4 +1,3 @@
-
 import copy
 
 from synthesium.mation.timestamp import TimeStamp
