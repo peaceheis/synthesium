@@ -3,7 +3,6 @@ import copy
 from synthesium.matable.matable import *
 from synthesium.mation.timestamp import TimeStamp
 
-
 class Mation:
     """Mations, short for Animations, are designed to provide a way to make Matables move, simultaneously updating Matables
     while being used in Canvas's renderer"""
