@@ -1,8 +1,8 @@
-from synthesium.mation.timestamp import TimeStamp
-from synthesium.utils.useful_functions import constant
-from synthesium.mation.mation import Mation
 from synthesium.matable.matable import Matable
 from synthesium.matable.point import Point
+from synthesium.mation.mation import Mation
+from synthesium.mation.timestamp import TimeStamp
+from synthesium.utils.useful_functions import constant
 
 """some predefined Mations"""
 #TODO sort these into folders

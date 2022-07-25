@@ -8,4 +8,4 @@ HALF_OPAQUE_BLUE = [0, 0, 1, .5]
 
 WHITE = [1, 1, 1, 1]
 BLACK = [0, 0, 0, 1]
-#TODO colors
+# TODO colors
