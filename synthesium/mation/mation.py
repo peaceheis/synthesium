@@ -2,6 +2,8 @@ import copy
 
 from synthesium.matable.matable import *
 from synthesium.mation.timestamp import TimeStamp
+from synthesium.utils.useful_functions import constant
+
 
 class Mation:
     """Mations, short for Animations, are designed to provide a way to make Matables move, simultaneously updating Matables

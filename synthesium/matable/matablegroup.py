@@ -63,7 +63,7 @@ class MatableGroup(Matable):
         # allowing MatableGroups to have their own points would be incompatible with the current rendering pipeline,
         # which reduces everything to primitives.
 
-    def matables(self) -> Tuple[Matable | MatableGroup]:
+    def matables(self):
         return self.matables
 
     def set_matables(self):

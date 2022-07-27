@@ -6,7 +6,7 @@ from math import pi
 
 from synthesium.matable.matable import Matable
 from synthesium.matable.point import Point
-from synthesium.utils.colors import PURE_BLUE
+from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_RED
 
 
 class Line(Matable):

@@ -10,7 +10,7 @@ from synthesium.matable.matablegroup import MatableGroup
 from synthesium.matable.primitives import Line, Arc, Curve
 from synthesium.mation.mation import Mation
 from synthesium.mation.mationgroup import MationGroup
-from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
+from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN, DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT
 
 
 class Canvas:

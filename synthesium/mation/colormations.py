@@ -1,6 +1,7 @@
 from synthesium.matable.matable import Matable
 from synthesium.mation.mation import Mation
 from synthesium.mation.timestamp import TimeStamp
+from synthesium.utils.useful_functions import constant
 
 
 class ChangeOpacity(Mation):
