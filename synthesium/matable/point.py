@@ -25,17 +25,17 @@ class Point:
         """Returns a tuple representing the Point in polar coordinates. Note: returns angle in radians."""
         radius = sqrt(self.x ** 2 + self.y ** 2)
 
-        x_sign = -1 if self.x < 0 else 1
-        y_sign = -1 if self.x < 0 else 1
+        x_sign = self.x < 0
+        y_sign = -self.x < 0
 
         match (x_sign, y_sign):  # matching the sign to the correct theta, as atan only returns values between -pi/2 and pi/2
-            case (1, 1):
+            case (True, True):
                 angle = atan(self.y / self.x)
-            case (-1, 1):
+            case (False, True):
                 angle = pi - atan(self.y / self.x)
-            case (-1, -1):
+            case (False, False):
                 angle = pi + atan(self.y / self.x)
-            case (1, -1):
+            case (True, False):
                 angle = 2 * pi - atan(self.y / self.x)
         return radius, angle
 

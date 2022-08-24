@@ -6,7 +6,7 @@ from math import pi
 
 from synthesium.matable.matable import Matable
 from synthesium.matable.point import Point
-from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_RED
+from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_RED, WHITE, BLACK
 
 
 class Line(Matable):
@@ -79,7 +79,16 @@ class Arc(Matable):
         self.angle2 = angle
         return self
 
+    def get_points(self):
+        return [self.radius]
+
 
 class Curve(Matable):
-    def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point):
+    def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point, **kwargs):
+        self.config = {
+            "fill_color": WHITE,
+            "color": BLACK,
+            "line_width": 4
+        }
+        self.configure(self.config, **kwargs)
         self.points = (anchor1, handle1, handle2, anchor2)  # look into Bézier curves, namely cubic ones, for info on how this works.

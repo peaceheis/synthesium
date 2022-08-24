@@ -124,7 +124,7 @@ class Canvas:
         self.ctx.new_sub_path()
         self.ctx.move_to(*curve.get_points()[0].as_tuple())
         self.ctx.curve_to(*curve.get_points()[0].as_tuple(), *curve.get_points()[1].as_tuple(),
-                          *curve.get_points()[2].as_tuple(), *curve.get_points()[3].as_tuple())
+                          *curve.get_points()[2].as_tuple())
         self.ctx.stroke_preserve()
         self.ctx.set_source_rgba(*reversed(curve.config["fill_color"][0:3]), curve.config["fill_color"][3])
         self.ctx.fill()  # 5d

@@ -21,6 +21,7 @@ class ChangeOpacity(Mation):
         self.target.set_opacity(
             self.start_opacity + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                       self.total_frames))
+        return self.target
 
 
 class ChangeOpacityFill(Mation):
@@ -40,6 +41,7 @@ class ChangeOpacityFill(Mation):
         self.target.set_opacity_fill(
             self.target.get_opacity() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                              self.total_frames))
+        return self.target
 
 
 class ChangeRed(Mation):
@@ -59,6 +61,7 @@ class ChangeRed(Mation):
         self.target.set_red(
             self.target.get_red() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                          self.total_frames))
+        return self.target
 
 
 class ChangeRedFill(Mation):
@@ -78,6 +81,7 @@ class ChangeRedFill(Mation):
         self.target.set_red_fill(
             self.target.get_red_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                               self.total_frames))
+        return self.target
 
 
 class ChangeGreen(Mation):
@@ -97,6 +101,7 @@ class ChangeGreen(Mation):
         self.target.set_green(
             self.target.get_green() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                            self.total_frames))
+        return self.target
 
 
 class ChangeGreenFill(Mation):
@@ -116,6 +121,7 @@ class ChangeGreenFill(Mation):
         self.target.set_green_fill(
             self.target.get_green_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                                 self.total_frames))
+        return self.target
 
 
 class ChangeBlue(Mation):
@@ -135,6 +141,7 @@ class ChangeBlue(Mation):
         self.target.set_blue(
             self.target.get_blue() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                           self.total_frames))
+        return self.target
 
 
 class ChangeBlueFill(Mation):
@@ -154,3 +161,4 @@ class ChangeBlueFill(Mation):
         self.target.set_blue_fill(
             self.target.get_blue_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
                                                                                                self.total_frames))
+        return self.target

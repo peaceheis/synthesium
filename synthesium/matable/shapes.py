@@ -3,6 +3,7 @@ from typing import Union
 
 from synthesium.matable.matablegroup import MatableGroup
 from synthesium.matable.primitives import *  # Arc, Line, Curve
+from synthesium.utils.colors import PURE_RED, PURE_GREEN, WHITE
 
 
 class Circle(Arc):
@@ -98,3 +99,6 @@ class Triangle(Polygon):
 
     def __init__(self, point1, point2, point3, **kwargs):
         super().__init__(point1, point2, point3, **kwargs)
+        self.config = {
+            "fill_color": PURE_RED
+        }

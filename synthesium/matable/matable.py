@@ -1,4 +1,5 @@
 from synthesium.matable.point import Point
+from synthesium.utils.colors import PURE_BLUE
 
 
 class Matable:
@@ -9,7 +10,7 @@ class Matable:
     def __init__(self, *points: "Union[tuple[Point], list[Point]]", color_stops=None, **kwargs: "dict[str, Any]"):
         if color_stops is None:
             color_stops = []
-        config = {
+        self.config = {
             "color": PURE_BLUE,
             "fill_color": PURE_BLUE,
             "line_width": 10
@@ -17,7 +18,7 @@ class Matable:
 
         self.points = tuple(points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
         self.color_stops = color_stops
-        self.config = self.configure(config, **kwargs)
+        self.config = self.configure(self.config, **kwargs)
 
     def configure(self, default_config, **kwargs):
         """Configure works by taking in all the kwargs passed to init(), and comparing them against the default config. Anything new is updated, 
