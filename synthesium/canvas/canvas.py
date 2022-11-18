@@ -188,7 +188,7 @@ class Canvas:
                 entity = mutator.tick()  # 5a.
                 valid = self.draw_vector_entities(entity)  # 5b
                 if not valid:
-                    raise Exception(f"Entity {entity} returned by mutator {mutator} not drawable.")
+                    raise Exception(f"VectorEntity {entity} returned by mutator {mutator} not drawable.")
 
                 width, height = self.get_dimensions()
                 buf = self.surface.get_data()

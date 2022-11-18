@@ -3,18 +3,18 @@ from typing import Type, Union
 from synthesium.entity.primitives import *
 
 
-class EntityGroup(Entity):
+class EntityGroup(VectorEntity):
     """Enables multiple Entities (such as the primitives Line, Arc, and Curve), to make what functions as one
-    Entity. """
+    VectorEntity. """
 
     def __init__(self, *entities: Union[tuple, list], **kwargs: dict) -> None:
         self.entities = entities
         self.points = []
         for entity in entities:
             self.points.extend(entity.get_points())
-        self.configure(kwargs)
+        configure(kwargs)
 
-    def add_entity(self, entity: Entity) -> "EntityGroup":
+    def add_entity(self, entity: VectorEntity) -> "EntityGroup":
         self.entities += entity
         self.points += entity.get_points()
         return self
@@ -24,7 +24,7 @@ class EntityGroup(Entity):
             Curves, and Arcs that make up  an EntityGroup.]
 
         Args:
-            type Type(Entity): [the type of the Entity to be found.]
+            type Type(VectorEntity): [the type of the VectorEntity to be found.]
 
         Returns:
             [list]: a list of all the entities of the type found, if none found, returns an empty list.
@@ -58,7 +58,7 @@ class EntityGroup(Entity):
         # the error is being raised,
         # so we set the normal arguments.
         raise Exception(
-            "Using set_points() is not allowed with EntityGroups; add an Entity such as Line, Arc, or Curve, "
+            "Using set_points() is not allowed with EntityGroups; add an VectorEntity such as Line, Arc, or Curve, "
             "or else another EntityGroup.")
         # allowing entityGroups to have their own points would be incompatible with the current rendering pipeline,
         # which reduces everything to primitives.
@@ -71,7 +71,7 @@ class EntityGroup(Entity):
         self.points = [entity.points for entity in self.entities]
 
     def __str__(self):
-        string = f"Entity Group of type {self.__class__.__name__}, consisting of "
+        string = f"VectorEntity Group of type {self.__class__.__name__}, consisting of "
         for entity in self.entities:
             string += f"\n\t {entity.__str__()}"
         return string

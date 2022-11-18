@@ -16,7 +16,7 @@ class Circle(Arc):
             "fill_color": WHITE,
             "line_width": 10
         }
-        self.configure(self.config, **kwargs)
+        configure(self.config, **kwargs)
         self.circumference = pi * (radius ** 2)
 
     def shift(self, amt: tuple):
@@ -63,7 +63,7 @@ class Polygon(EntityGroup):
         entities.append(Line(points[-1], points[0]))  # connect last element and first element.
 
         super().__init__(*entities, **kwargs)  # let EntityGroup handle the rest.
-        self.configure(default_config,
+        configure(default_config,
                        **kwargs)  # while EntityGroup also has configure() in the init, it's best to update with Polygon's default config.
 
     def __repr__(self):

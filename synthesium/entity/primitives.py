@@ -4,16 +4,16 @@ in cairo, line_to(), curve_to(), and arc(). By doing this, all other shapes can 
 
 from math import pi
 
-from synthesium.entity.entity import Entity
+from synthesium.entity.vectorentity import VectorEntity
 from synthesium.entity.point import Point
 from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_RED, WHITE, BLACK
 
 
-class Line(Entity):
+class Line(VectorEntity):
     def __init__(self, point1: Point, point2: Point, **kwargs):
         super().__init__(point1, point2, **kwargs)
 
-    def get_point1(self):
+    def get_point1(self) -> None:
         return self.points[0]
 
     def set_point1(self, point: Point):
@@ -24,11 +24,11 @@ class Line(Entity):
         return self.points[1]
 
     def set_point2(self, point: Point):
-        self.point.y = point
+        self.point2 = point
         return self
 
 
-class Arc(Entity):
+class Arc(VectorEntity):
     def __init__(self, center: Point, radius: int, angle1: int, angle2: int, negative=False, **kwargs):
         default_config = {
             "color": PURE_BLUE,
@@ -42,7 +42,7 @@ class Arc(Entity):
         self.points = center,
         # for compatability purposes with the rest of the library, which assumes all entities have a tuple attribute called self.points.
         self.negative = negative
-        self.config = self.configure(default_config, **kwargs)
+        self.config = configure(default_config, **kwargs)
         self.degrees = abs(angle1 - angle2)
 
     def arc_length(self) -> float:
@@ -83,13 +83,13 @@ class Arc(Entity):
         return [self.radius]
 
 
-class Curve(Entity):
+class Curve(VectorEntity):
     def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point, **kwargs):
         self.config = {
             "fill_color": WHITE,
             "color": BLACK,
             "line_width": 4
         }
-        self.configure(self.config, **kwargs)
+        configure(self.config, **kwargs)
         self.points = (
         anchor1, handle1, handle2, anchor2)  # look into Bézier curves, namely cubic ones, for info on how this works.

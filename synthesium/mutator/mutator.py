@@ -1,6 +1,6 @@
 import copy
 
-from synthesium.entity.entity import *
+from synthesium.entity.vectorentity import *
 from synthesium.mutator.timestamp import TimeStamp
 from synthesium.utils.useful_functions import constant
 
@@ -8,7 +8,7 @@ from synthesium.utils.useful_functions import constant
 class Mutator:
     """Mutators make Entities change, and also return them for Canvas's renderer"""
 
-    def __init__(self, target: Entity, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant):
         self.current_frame = None
         self.should_call_pre_tick = False
         self.target = target
@@ -31,7 +31,7 @@ class Mutator:
                or \
                self.get_start() <= mutator.get_end() and self.get_end() >= mutator.get_start()
 
-    def tick(self) -> Entity:
+    def tick(self) -> VectorEntity:
         """Tick gets called by Canvas to make the mutator advance by one frame: tick updates the `target` Entity, and updates
         the attribute self.current_frame, which is initialized ONLY after set_fps is called by Canvas, by the amount returned by the rate_function."""
         self.current_frame += 1

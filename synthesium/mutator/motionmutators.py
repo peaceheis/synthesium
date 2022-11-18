@@ -1,4 +1,4 @@
-from synthesium.entity.entity import Entity
+from synthesium.entity.vectorentity import VectorEntity
 from synthesium.entity.point import Point
 from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
@@ -9,7 +9,7 @@ from synthesium.utils.useful_functions import constant
 
 # TODO sort these into folders
 class Show(Mutator):
-    def __init__(self, target: Entity, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func=rate_func)
 
     def tick(self):
@@ -20,7 +20,7 @@ class Show(Mutator):
 class Move(Mutator):
     """Shifts are done by adding a tuple of length 2, in the form (x movement, y movement). Use negatives for left and down, respectively."""
 
-    def __init__(self, target: Entity, amount: tuple, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, amount: tuple, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.amount = amount
 
@@ -33,7 +33,7 @@ class Move(Mutator):
 
 
 class Rotate(Mutator):
-    def __init__(self, target: Entity, degrees: int, center: Point, start: TimeStamp, end: TimeStamp,
+    def __init__(self, target: VectorEntity, degrees: int, center: Point, start: TimeStamp, end: TimeStamp,
                  rotates_clockwise=True, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.degrees = degrees
@@ -50,7 +50,7 @@ class Rotate(Mutator):
 class MovePoint(Mutator):
     """Shifts are done by adding a tuple of length 2, in the form (x movement, y movement). Use negatives for left and down, respectively."""
 
-    def __init__(self, target: Entity, point_index: int, amount: tuple, start: TimeStamp, end: TimeStamp,
+    def __init__(self, target: VectorEntity, point_index: int, amount: tuple, start: TimeStamp, end: TimeStamp,
                  rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.point_index = point_index
@@ -66,7 +66,7 @@ class MovePoint(Mutator):
 
 
 class Transform(Mutator):
-    def __init__(self, target: Entity, attribute: str, end_attribute, start: TimeStamp, end: TimeStamp,
+    def __init__(self, target: VectorEntity, attribute: str, end_attribute, start: TimeStamp, end: TimeStamp,
                  rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.attribute = attribute.lower()

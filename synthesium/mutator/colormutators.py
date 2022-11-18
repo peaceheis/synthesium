@@ -1,11 +1,11 @@
-from synthesium.entity.entity import Entity
+from synthesium.entity.vectorentity import VectorEntity
 from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
 from synthesium.utils.useful_functions import constant
 
 
 class ChangeOpacity(Mutator):
-    def __init__(self, target: Entity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -25,7 +25,7 @@ class ChangeOpacity(Mutator):
 
 
 class ChangeOpacityFill(Mutator):
-    def __init__(self, target: Entity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -45,7 +45,7 @@ class ChangeOpacityFill(Mutator):
 
 
 class ChangeRed(Mutator):
-    def __init__(self, target: Entity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_red = None
@@ -65,7 +65,7 @@ class ChangeRed(Mutator):
 
 
 class ChangeRedFill(Mutator):
-    def __init__(self, target: Entity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.start_red = None
         self.difference = None
@@ -85,7 +85,7 @@ class ChangeRedFill(Mutator):
 
 
 class ChangeGreen(Mutator):
-    def __init__(self, target: Entity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -105,7 +105,7 @@ class ChangeGreen(Mutator):
 
 
 class ChangeGreenFill(Mutator):
-    def __init__(self, target: Entity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -125,7 +125,7 @@ class ChangeGreenFill(Mutator):
 
 
 class ChangeBlue(Mutator):
-    def __init__(self, target: Entity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None
@@ -145,7 +145,7 @@ class ChangeBlue(Mutator):
 
 
 class ChangeBlueFill(Mutator):
-    def __init__(self, target: Entity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(self, target: VectorEntity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None

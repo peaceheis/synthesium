@@ -1,4 +1,4 @@
-from synthesium.entity.entity import Entity
+from synthesium.entity.vectorentity import VectorEntity
 from synthesium.entity.entitygroup import EntityGroup
 from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
@@ -7,7 +7,7 @@ from synthesium.mutator.timestamp import TimeStamp
 class MutatorGroup(Mutator):
     """a Mutator composed of mutators, used internally with Canvas so that it only has to process one Mutator at a time, which simplifies a lot of logic."""
 
-    def __init__(self, target: Entity, start: TimeStamp, end: TimeStamp, *mutators, fps=None):
+    def __init__(self, target: VectorEntity, start: TimeStamp, end: TimeStamp, *mutators, fps=None):
         super().__init__(target, start, end)
         self.should_call_pre_tick = False
         self.mutators = [mutator for mutator in mutators]
