@@ -1,19 +1,31 @@
-from synthesium.mation.timestamp import TimeStamp
+import unittest
 
-def test(): 
-    test_comparisons()
+from synthesium.mutator.timestamp import TimeStamp
 
-def test_comparisons():
-    less = TimeStamp(1, 3, 2)
-    more = TimeStamp(2, 2, 4)
-    base = TimeStamp(2, 0, 1)
 
-    assert less < base 
-    assert more > base
-    assert base == base
-    assert less <= base
-    assert more >= base
-    assert not base > base
-    assert not base <= less
+class TimeStampTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.less = TimeStamp(1, 3, 2)
+        self.more = TimeStamp(2, 2, 4)
+        self.base = TimeStamp(2, 0, 1)
 
-test_comparisons()
+    def test_lt(self):
+        self.assertLess(self.less, self.base, msg="Less not < Base")
+
+    def test_gt(self):
+        self.assertGreater(self.more, self.base, msg="More not > Base")
+
+    def test_eq(self):
+        self.assertEqual(self.base, self.base, msg="Base not == Base")
+
+    def test_leq(self):
+        self.assertLessEqual(self.less, self.base, msg="Less not <= Base")
+
+    def test_geq(self):
+        self.assertGreaterEqual(self.more, self.base, msg="More not >= Base")
+
+    def test_not_gt(self):
+        self.assertIsNot(self.base, self.base > self.base, msg="Base > Base")
+
+    def test_not_leq(self):
+        self.assertIsNot(self.base, self.base <= self.less, msg="Base <= Less")
