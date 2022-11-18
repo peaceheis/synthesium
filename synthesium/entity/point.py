@@ -28,7 +28,8 @@ class Point:
         x_sign = self.x < 0
         y_sign = -self.x < 0
 
-        match (x_sign, y_sign):  # matching the sign to the correct theta, as atan only returns values between -pi/2 and pi/2
+        match (
+        x_sign, y_sign):  # matching the sign to the correct theta, as atan only returns values between -pi/2 and pi/2
             case (True, True):
                 angle = atan(self.y / self.x)
             case (False, True):

@@ -1,8 +1,8 @@
-"""Predefined Matables made of the Primitives Line, Arc, and Curve"""
+"""Predefined entities made of the Primitives Line, Arc, and Curve"""
 from typing import Union
 
-from synthesium.matable.matablegroup import MatableGroup
-from synthesium.matable.primitives import *  # Arc, Line, Curve
+from synthesium.entity.entitygroup import EntityGroup
+from synthesium.entity.primitives import *  # Arc, Line, Curve
 from synthesium.utils.colors import PURE_RED, PURE_GREEN, WHITE
 
 
@@ -11,6 +11,12 @@ class Circle(Arc):
 
     def __init__(self, center: Point, radius: int, **kwargs):
         super().__init__(center, radius, 0, 360, **kwargs)
+        self.config = {
+            "color": WHITE,
+            "fill_color": WHITE,
+            "line_width": 10
+        }
+        self.configure(self.config, **kwargs)
         self.circumference = pi * (radius ** 2)
 
     def shift(self, amt: tuple):
@@ -39,9 +45,9 @@ class Circle(Arc):
 
 
 # slightly more involved geometry goes here.
-class Polygon(MatableGroup):
+class Polygon(EntityGroup):
     """Base class for Polygons, as the name suggests. Most of its functionality lies in being able to converting points to Lines to direct to the
-       MatableGroup constructor."""
+       EntityGroup constructor."""
 
     def __init__(self, *points, **kwargs):
         default_config = {
@@ -50,15 +56,15 @@ class Polygon(MatableGroup):
             "fill_color": PURE_GREEN
         }
 
-        matables = []
+        entities = []
         for i in range(
                 len(points) - 1):  # using 1 less because the last point has to connect to the first point, which requires special handling.
-            matables.append(Line(points[i], points[i + 1]))
-        matables.append(Line(points[-1], points[0]))  # connect last element and first element.
+            entities.append(Line(points[i], points[i + 1]))
+        entities.append(Line(points[-1], points[0]))  # connect last element and first element.
 
-        super().__init__(*matables, **kwargs)  # let MatableGroup handle the rest.
+        super().__init__(*entities, **kwargs)  # let EntityGroup handle the rest.
         self.configure(default_config,
-                       **kwargs)  # while MatableGroup also has configure() in the init, it's best to update with Polygon's default config.
+                       **kwargs)  # while EntityGroup also has configure() in the init, it's best to update with Polygon's default config.
 
     def __repr__(self):
         return f"Polygon({self.points})"
@@ -68,7 +74,7 @@ class Quadrilateral(Polygon):
     """Class for any Quadrilaterals, inheriting from Polygon. """
 
     def __init__(self, point1, point2, point3, point4, **kwargs):
-        """Instead of making the user create each individual Matable, all the user has to do is give the points and Synthesium generates the rest."""
+        """Instead of making the user create each individual Entity, all the user has to do is give the points and Synthesium generates the rest."""
         super().__init__(point1, point2, point3, point4, **kwargs)
 
 

@@ -1,15 +1,15 @@
-"""The 'primitive' classes that make up the basis of all the Matables in Synthesium: (straight) Lines, Arcs, and (cubic bezier) Curves.
+"""The 'primitive' classes that make up the basis of all the Entities in Synthesium: (straight) Lines, Arcs, and (cubic bezier) Curves.
 Rendering in Synthesium (should) reduce everything to these. The reason for these primitives is to have a one to one match for the drawing functions
-in cairo, line_to(), curve_to(), and arc(). By doing this, all other shapes can be defined as MatableGroups, which have different combinations of these primitives."""
+in cairo, line_to(), curve_to(), and arc(). By doing this, all other shapes can be defined as EntitiyGroups, which have different combinations of these primitives."""
 
 from math import pi
 
-from synthesium.matable.matable import Matable
-from synthesium.matable.point import Point
+from synthesium.entity.entity import Entity
+from synthesium.entity.point import Point
 from synthesium.utils.colors import PURE_BLUE, HALF_OPAQUE_RED, WHITE, BLACK
 
 
-class Line(Matable):
+class Line(Entity):
     def __init__(self, point1: Point, point2: Point, **kwargs):
         super().__init__(point1, point2, **kwargs)
 
@@ -28,7 +28,7 @@ class Line(Matable):
         return self
 
 
-class Arc(Matable):
+class Arc(Entity):
     def __init__(self, center: Point, radius: int, angle1: int, angle2: int, negative=False, **kwargs):
         default_config = {
             "color": PURE_BLUE,
@@ -40,7 +40,7 @@ class Arc(Matable):
         self.angle1 = angle1
         self.angle2 = angle2
         self.points = center,
-        # for compatability purposes with the rest of the library, which assumes all Matables have a tuple attribute called self.points.
+        # for compatability purposes with the rest of the library, which assumes all entities have a tuple attribute called self.points.
         self.negative = negative
         self.config = self.configure(default_config, **kwargs)
         self.degrees = abs(angle1 - angle2)
@@ -83,7 +83,7 @@ class Arc(Matable):
         return [self.radius]
 
 
-class Curve(Matable):
+class Curve(Entity):
     def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point, **kwargs):
         self.config = {
             "fill_color": WHITE,
@@ -91,4 +91,5 @@ class Curve(Matable):
             "line_width": 4
         }
         self.configure(self.config, **kwargs)
-        self.points = (anchor1, handle1, handle2, anchor2)  # look into Bézier curves, namely cubic ones, for info on how this works.
+        self.points = (
+        anchor1, handle1, handle2, anchor2)  # look into Bézier curves, namely cubic ones, for info on how this works.

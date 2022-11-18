@@ -1,9 +1,9 @@
-from synthesium.matable.point import Point
+from synthesium.entity.point import Point
 from synthesium.utils.colors import PURE_BLUE
 
 
-class Matable:
-    """Short for Animatable Object, a Matable is designed to hold points, 
+class Entity:
+    """An is designed to hold points,
     which are named tuples of coordinate pairs, and instructions on how to connect them.\n
     For simple reference, both point.x and point.x will mean the x-value of a point, and point.y/point.y means the y-value."""
 
@@ -16,7 +16,8 @@ class Matable:
             "line_width": 10
         }
 
-        self.points = tuple(points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
+        self.points = tuple(
+            points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
         self.color_stops = color_stops
         self.config = self.configure(self.config, **kwargs)
 
@@ -135,7 +136,7 @@ class Matable:
         self.config["color"] = list(color)
 
     def __repr__(self):
-        return f"Matable of type {self.__class__.__name__} consisting of points {self.points}"  # TODO, make better REPR
+        return f"Entity of type {self.__class__.__name__} consisting of points {self.points}"  # TODO, make better REPR
 
     def __str__(self):
-        return f"Matable of type {self.__class__.__name__} consisting of points {self.points}"
+        return f"Entity of type {self.__class__.__name__} consisting of points {self.points}"

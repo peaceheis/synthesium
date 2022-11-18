@@ -6,10 +6,10 @@ import cairo
 import numpy
 from cairo import ImageSurface
 
-from synthesium.matable.matablegroup import MatableGroup
-from synthesium.matable.primitives import Line, Arc, Curve
-from synthesium.mation.mation import Mation
-from synthesium.mation.mationgroup import MationGroup
+from synthesium.entity.entitygroup import EntityGroup
+from synthesium.entity.primitives import Line, Arc, Curve
+from synthesium.mutator.mutator import Mutator
+from synthesium.mutator.mutatorgroup import MutatorGroup
 from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN, DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT
 
 
@@ -17,8 +17,8 @@ class Canvas:
     """The canvas acts as the entry point between the user and Synthesium. The user creates a class that inherits
     from Canvas, and overrides construct. They then must instantiate their custom class, and
     run save("end_directory"), which returns the finished video. All the rendering gets done after that method is called,
-    breaking MatableGroups down to Primitives, which cairo then draws.
-    In addition, animation goes on here, by calling tick() on every active Mation.
+    breaking EntityGroups down to Primitives, which cairo then draws.
+    In addition, animation goes on here, by calling tick() on every active Mutator.
     """
 
     def __init__(self, /,
@@ -28,7 +28,7 @@ class Canvas:
                  frame_size: object = (DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT)) -> None:
         # TODO, make a better default frame size
         self.pipe = None
-        self.mations = []
+        self.mutators = []
         self.background_color = background_color
         self.fps = fps
         self.width, self.height = canvas_size  # canvas size is the size of the canvas in which everything will be
@@ -52,25 +52,25 @@ class Canvas:
         self.ctx.rectangle(0, 0, self.width, self.height)
         self.ctx.fill()
 
-    def add(self, *mations):
-        """calling self.add(mation) doesn't do much besides add it to the list of Mations to be processed. The heavy lifting is done when
+    def add(self, *mutators):
+        """calling self.add(mutator) doesn't do much besides add it to the list of mutators to be processed. The heavy lifting is done when
         Canvas.write() is called, outside the class definition."""
         self.count += 1
-        for mation in mations:
-            mation.set_fps(self.fps)
-            self.mations.append(mation)
+        for mutator in mutators:
+            mutator.set_fps(self.fps)
+            self.mutators.append(mutator)
 
     # auxiliary functions to save()
 
-    def sort_mationlist(self):
-        """Sorts the mationlist by start frame. It assumes that the Mations have been add()ed, and therefore have
+    def sort_mutatorlist(self):
+        """Sorts the mutatorlist by start frame. It assumes that the Mutators have been add()ed, and therefore have
            had their fps set."""
-        return sorted(self.mations, key=Mation.get_start_as_int)
+        return sorted(self.mutators, key=Mutator.get_start_as_int)
 
-    def merge_mations(self):
-        """Take all the mations in a list and compress them into a list of MationGroup to remove any overlap between 
-           Mations. This is used with Canvas to ensure only one Mation (or MationGroup) has to be handled at a time."""
-        return [MationGroup(*self.mations, fps=self.fps)]  # TODO write a functioning mation merging method
+    def merge_mutators(self):
+        """Take all the mutators in a list and compress them into a list of MutatorGroup to remove any overlap between
+           mutators. This is used with Canvas to ensure only one Mutator (or MutatorGroup) has to be handled at a time."""
+        return [MutatorGroup(*self.mutators, fps=self.fps)]  # TODO write a functioning mutator merging method
 
     def open_pipe_for_rendering(self, end_dir):
         if not os.path.exists(os.path.split(end_dir)[0]):
@@ -129,35 +129,35 @@ class Canvas:
         self.ctx.set_source_rgba(*reversed(curve.config["fill_color"][0:3]), curve.config["fill_color"][3])
         self.ctx.fill()  # 5d
 
-    def draw_matable_group(self, mgroup: MatableGroup):
-        to_be_drawn: list = mgroup.get_matables_by_type(Line)
+    def draw_entity_group(self, mgroup: EntityGroup):
+        to_be_drawn: list = mgroup.get_entities_by_type(Line)
         for line in to_be_drawn:
             self.draw_line(line)
 
-        to_be_drawn: list = mgroup.get_matables_by_type(Arc)
+        to_be_drawn: list = mgroup.get_entities_by_type(Arc)
         for arc in to_be_drawn:
             self.draw_arc(arc)
 
-        to_be_drawn: list = mgroup.get_matables_by_type(Curve)
+        to_be_drawn: list = mgroup.get_entities_by_type(Curve)
         for curve in to_be_drawn:
             self.draw_curve(curve)
 
-    def draw_vector_matables(self, matable):
-        # MatableGroup handling
-        if isinstance(matable, MatableGroup):
-            self.draw_matable_group(matable)  # 5b
+    def draw_vector_entities(self, entity):
+        # EntityGroup handling
+        if isinstance(entity, EntityGroup):
+            self.draw_entity_group(entity)  # 5b
             return True
 
-        elif isinstance(matable, Line):
-            self.draw_line(matable)  # 5c
+        elif isinstance(entity, Line):
+            self.draw_line(entity)  # 5c
             return True
 
-        elif isinstance(matable, Arc):
-            self.draw_arc(matable)  # 5d
+        elif isinstance(entity, Arc):
+            self.draw_arc(entity)  # 5d
             return True
 
-        elif isinstance(matable, Curve):
-            self.draw_curve(matable)  # 5e
+        elif isinstance(entity, Curve):
+            self.draw_curve(entity)  # 5e
             return True
 
         else:
@@ -165,30 +165,30 @@ class Canvas:
 
     def save(self, end_dir: str):
         """This is where all the rendering work gets done. The steps are as follows:
-                1. The mation list is constructed (by calling the user-defined construct()), and sorted by start frame,
-                2. A compressed list where any overlapping Mations are made into a MationGroup is generated,
+                1. The mutator list is constructed (by calling the user-defined construct()), and sorted by start frame,
+                2. A compressed list where any overlapping mutators are made into a MutatorGroup is generated,
                 3. After verification of the end directory, a pipe is opened to ffmpeg to string together all the frames.
                 5. The animation then gets rendered via loop: 
-                    5a. Make the animation progress 1 frame, and get all the matables to be drawn in that frame.
+                    5a. Make the animation progress 1 frame, and get all the entities to be drawn in that frame.
                     5b. Break them down, and render the primitives Line, Arc, and Curve.
                 6. The video is written."""
 
-        if len(self.mations) == 0:
-            raise Exception("No Mations were added!")
-        self.mations = self.sort_mationlist()  # 1
-        self.mations = self.merge_mations()  # 2
+        if len(self.mutators) == 0:
+            raise Exception("No mutators were added!")
+        self.mutators = self.sort_mutatorlist()  # 1
+        self.mutators = self.merge_mutators()  # 2
         self.pipe = self.open_pipe_for_rendering(end_dir)  # 3
 
-        for mation in self.mations:
-            print(f"Processing mation {mation}")
-            if mation.should_call_pre_tick:
-                mation.pre_tick()
-            for _ in mation.get_range_of_frames():  # 5
-                print(f"processing frame {mation.current_frame}")
-                matable = mation.tick()  # 5a.
-                valid = self.draw_vector_matables(matable)  # 5b
+        for mutator in self.mutators:
+            print(f"Processing mutator {mutator}")
+            if mutator.should_call_pre_tick:
+                mutator.pre_tick()
+            for _ in mutator.get_range_of_frames():  # 5
+                print(f"processing frame {mutator.current_frame}")
+                entity = mutator.tick()  # 5a.
+                valid = self.draw_vector_entities(entity)  # 5b
                 if not valid:
-                    raise Exception(f"Matable {matable} returned by mation {mation} not drawable.")
+                    raise Exception(f"Entity {entity} returned by mutator {mutator} not drawable.")
 
                 width, height = self.get_dimensions()
                 buf = self.surface.get_data()
@@ -208,5 +208,5 @@ class Canvas:
         self.save(enddir)
 
     def construct(self):
-        """Construct() lies at the heart of Synthesium. All Mations should be played in self.construct(), which the 
+        """Construct() lies at the heart of Synthesium. All mutators should be played in self.construct(), which the 
         internal pipeline looks for when creating an animation. This idea from this comes from 3b1b's Manim. Check it out at https://github.com/3b1b/manim"""

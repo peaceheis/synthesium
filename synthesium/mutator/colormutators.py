@@ -1,11 +1,11 @@
-from synthesium.matable.matable import Matable
-from synthesium.mation.mation import Mation
-from synthesium.mation.timestamp import TimeStamp
+from synthesium.entity.entity import Entity
+from synthesium.mutator.mutator import Mutator
+from synthesium.mutator.timestamp import TimeStamp
 from synthesium.utils.useful_functions import constant
 
 
-class ChangeOpacity(Mation):
-    def __init__(self, target: Matable, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeOpacity(Mutator):
+    def __init__(self, target: Entity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -24,8 +24,8 @@ class ChangeOpacity(Mation):
         return self.target
 
 
-class ChangeOpacityFill(Mation):
-    def __init__(self, target: Matable, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeOpacityFill(Mutator):
+    def __init__(self, target: Entity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -44,8 +44,8 @@ class ChangeOpacityFill(Mation):
         return self.target
 
 
-class ChangeRed(Mation):
-    def __init__(self, target: Matable, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeRed(Mutator):
+    def __init__(self, target: Entity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_red = None
@@ -64,8 +64,8 @@ class ChangeRed(Mation):
         return self.target
 
 
-class ChangeRedFill(Mation):
-    def __init__(self, target: Matable, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeRedFill(Mutator):
+    def __init__(self, target: Entity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.start_red = None
         self.difference = None
@@ -84,8 +84,8 @@ class ChangeRedFill(Mation):
         return self.target
 
 
-class ChangeGreen(Mation):
-    def __init__(self, target: Matable, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeGreen(Mutator):
+    def __init__(self, target: Entity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -104,8 +104,8 @@ class ChangeGreen(Mation):
         return self.target
 
 
-class ChangeGreenFill(Mation):
-    def __init__(self, target: Matable, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeGreenFill(Mutator):
+    def __init__(self, target: Entity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -124,8 +124,8 @@ class ChangeGreenFill(Mation):
         return self.target
 
 
-class ChangeBlue(Mation):
-    def __init__(self, target: Matable, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeBlue(Mutator):
+    def __init__(self, target: Entity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None
@@ -144,8 +144,8 @@ class ChangeBlue(Mation):
         return self.target
 
 
-class ChangeBlueFill(Mation):
-    def __init__(self, target: Matable, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+class ChangeBlueFill(Mutator):
+    def __init__(self, target: Entity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None
