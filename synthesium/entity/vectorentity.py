@@ -6,22 +6,13 @@ from synthesium.utils.colors import PURE_BLUE
 
 
 class VectorEntity(Entity):
-    """An is designed to hold points,
+    """A VectorEntity is designed to hold Points,
     which are named tuples of coordinate pairs, and instructions on how to connect them.\n
     For simple reference, both point.x and point.x will mean the x-value of a point, and point.y/point.y means the y-value."""
 
-    def __init__(self, *points: Point, color_stops=None, **kwargs: "dict[str, Any]"):
-        if color_stops is None:
-            color_stops = []
-        self.config = {
-            "color": PURE_BLUE,
-            "fill_color": PURE_BLUE,
-            "line_width": 10
-        }
-
-        self.points: tuple[Point] = tuple(
-            points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
-        self.color_stops = color_stops
+    def __init__(self, *points: Point, **kwargs: "dict[str, Any]"):
+        super().__init__()
+        self.points: tuple[Point] = tuple(points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
         self.config = configure(self.config, **kwargs)
 
     # movement functions
@@ -39,12 +30,7 @@ class VectorEntity(Entity):
         return self
 
     # properties
-    def get_points(self):
-        """
-
-        Returns:
-            object:
-        """
+    def get_points(self) -> tuple[Point]:
         return self.points
 
     def set_points(self, *points):

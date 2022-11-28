@@ -1,3 +1,8 @@
+from synthesium.utils.defaults import DEFAULT_FPS
+
+FPS = DEFAULT_FPS
+
+
 class TimeStamp:
     def __init__(self, minute: int = 0, second: int = 0, frame: int = 0):
         self.minute = minute
@@ -7,6 +12,22 @@ class TimeStamp:
     def set(self, **kwargs):
         for attr in kwargs.keys():
             self.__setattr__(attr, kwargs[attr])
+
+    def __repr__(self):
+        return f"synthesium.mutator.timestamp.TimeStamp({self.minute}, {self.second}, {self.frame})"
+
+    def __str__(self):
+        return f"TimeStamp with minute {self.minute}, second {self.second}, frame {self.frame}"
+
+    def increment(self):
+        self.frame += 1
+        if self.frame >= FPS:
+            self.frame = 0
+            self.second += 1
+
+        if self.second > 59:
+            self.second = 0
+            self.minute += 1
 
     def get_minute(self):
         return self.minute
@@ -82,7 +103,7 @@ class TimeStamp:
         return self.__lt__(marker) or self.__eq__(marker)
 
     def is_equal_to_or_before(self, marker: "TimeStamp"):
-        return self.__le__(self, marker)
+        return self.__le__(marker)
 
     def __str__(self):
         return f"{self.__class__.__name__} at min {self.minute}, sec {self.second}, and frame {self.frame}"

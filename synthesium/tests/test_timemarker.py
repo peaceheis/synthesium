@@ -1,13 +1,23 @@
 import unittest
 
+from synthesium.mutator import timestamp
 from synthesium.mutator.timestamp import TimeStamp
 
 
 class TimeStampTest(unittest.TestCase):
     def setUp(self) -> None:
         self.less = TimeStamp(1, 3, 2)
-        self.more = TimeStamp(2, 2, 4)
-        self.base = TimeStamp(2, 0, 1)
+        self.more = TimeStamp(3, 0, 4)
+        self.base = TimeStamp(2, 2, 1)
+        self.incrementer = TimeStamp()
+        self.test_fps = 30
+        timestamp.FPS = self.test_fps
+
+    def test_incrementer(self):
+        for _ in range(self.test_fps * 60):
+            self.incrementer.increment()
+
+        self.assertEqual(TimeStamp(1, 0, 0), self.incrementer)
 
     def test_lt(self):
         self.assertLess(self.less, self.base, msg="Less not < Base")
