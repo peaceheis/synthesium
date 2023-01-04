@@ -1,19 +1,15 @@
 import os
 import os.path
 import subprocess
-import warnings
 
 import cairo
-import numpy
 import numpy as np
-from cairo import ImageSurface
 
 from synthesium.entity.entity import Entity
 from synthesium.mutator import timestamp
-from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
 from synthesium.utils import defaults
-from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN, DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT
+from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 
 
 class Canvas:
@@ -29,7 +25,7 @@ class Canvas:
                  width: int,
                  height: int,
                  fps=DEFAULT_FPS,
-                 background_frame = None) -> None:
+                 background_frame=None) -> None:
         # TODO, make a better default frame size
 
         self.fps = fps
@@ -41,15 +37,15 @@ class Canvas:
         timestamp.FPS = fps
         self.current_frame = TimeStamp()
         self.background_frame = background_frame
-        self.end = TimeStamp()
         self.construct()
+        self.end = max(entity.end for entity in self.entities)
         self.write(path)
 
     def get_dimensions(self):
         return self.width, self.height
 
     def launch_writing_subprocess(self, end_dir):
-        if not os.path.exists(os.path.split(end_dir)[0]):
+        if not os.path.exists(os.path.split(end_dir)[0]):  # TODO: create directory ourself!
             raise Exception(f"directory {end_dir} provided to Canvas {self.__class__.__name__} does not exist.")
 
         command = [
@@ -72,10 +68,12 @@ class Canvas:
         # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def save(self, end_dir: str):
+        print(f"Starting Write of {self.__class__.__name__}")
         self.process = self.launch_writing_subprocess(end_dir)
         arr = self.background_frame or np.zeros((self.width, self.height, defaults.DEFAULT_COLOR_DEPTH))
 
         while self.current_frame < self.end:
+            print(f"Processing frame {self.current_frame}")
             self.current_frame.increment()
             for entity in self.entities:
                 if not entity.active_at(self.current_frame):
@@ -85,18 +83,20 @@ class Canvas:
                 x_size, y_size = entity.get_size()
                 render = entity.render(self.current_frame, fps=self.fps)
 
-                for x in range(start_x, start_x+x_size):
-                    for y in range(start_y, start_y+y_size):
-                        arr[x, y] = entity.blending_func(arr, render)
+                for x, arr_x in enumerate(range(x_size)):
+                    for y, arr_y in enumerate(range(y_size)):
+                        arr[x + start_x, y + start_y] = render[x, y]
 
-            self.process.stdin.write(arr.tobytes())
-
+            x = arr.tobytes()
+            self.process.stdin.write(x)
+            ctx = cairo.Context()
+            ctx.
 
         self.process.stdin.close()
         self.process.wait()
         self.process.terminate()
 
-    def write(self, enddir: str):  # funny how the most involved method is the shortest.
+    def write(self, enddir: str):
         self.construct()
         self.save(enddir)
 

@@ -58,5 +58,5 @@ class Point:
     def __mul__(self, point: "Point"):
         return Point(self.x * point.x, self.y * point.y)
 
-    def __div__(self, point: "Point"):
+    def __truediv__(self, point: "Point"):
         return Point(int(self.x / point.x), int(self.y / point.y))
