@@ -56,8 +56,8 @@ class TimeStamp:
     def time_as_tuple(self):
         return self.minute, self.second, self.frame
 
-    def time_as_int(self, fps):
-        return self.minute * 60 * fps + self.second * fps + self.frame
+    def time_as_int(self, fps=FPS):
+        return self.minute * 60 * FPS + self.second * FPS + self.frame
 
     def __gt__(self, marker: "TimeStamp"):
         if self.minute > marker.minute:

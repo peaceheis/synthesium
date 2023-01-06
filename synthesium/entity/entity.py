@@ -1,7 +1,6 @@
 import numpy as np
 
 from synthesium.canvas import blendingfuncs
-from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
 
 
@@ -11,7 +10,7 @@ class Entity:
         *mutators,
         blending_func: blendingfuncs.blendingfunc = blendingfuncs.normal
     ):
-        self.mutators: "list[Mutator]" = []
+        self.mutators: "list" = []
         self.visible_from: list[tuple[TimeStamp]] = []
         self.start: TimeStamp = TimeStamp()
         self.end: TimeStamp = TimeStamp()

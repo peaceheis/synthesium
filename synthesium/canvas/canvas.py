@@ -42,7 +42,7 @@ class Canvas:
         self.background_frame = background_frame
         self.construct()
         self.end = max(entity.end for entity in self.entities)
-        self.write(path)
+        self.save(path)
 
     def get_dimensions(self):
         return self.width, self.height
@@ -109,10 +109,6 @@ class Canvas:
         self.process.stdin.close()
         self.process.wait()
         self.process.terminate()
-
-    def write(self, enddir: str):
-        self.construct()
-        self.save(enddir)
 
     def construct(self):
         """Construct() lies at the heart of Synthesium. All mutators should be played in self.construct(), which the
