@@ -1,11 +1,16 @@
 import numpy as np
 
 from synthesium.canvas import blendingfuncs
+from synthesium.mutator.mutator import Mutator
 from synthesium.mutator.timestamp import TimeStamp
 
 
 class Entity:
-    def __init__(self, *mutators, blending_func: blendingfuncs.blendingfunc = blendingfuncs.normal):
+    def __init__(
+        self,
+        *mutators,
+        blending_func: blendingfuncs.blendingfunc = blendingfuncs.normal
+    ):
         self.mutators: "list[Mutator]" = []
         self.visible_from: list[tuple[TimeStamp]] = []
         self.start: TimeStamp = TimeStamp()
@@ -27,7 +32,9 @@ class Entity:
         self.end = max(self.end, *[window[1] for window in windows])
 
     def active_at(self, frame: TimeStamp):
-        if not self.start <= frame <= self.end:  # more coarse check to see if we should look through windows or not.
+        if (
+            not self.start <= frame <= self.end
+        ):  # more coarse check to see if we should look through windows or not.
             return False
 
         for window in self.visible_from:
@@ -49,8 +56,10 @@ class Entity:
 
 def configure(default_config, **kwargs):
     """Configure works by taking in all the kwargs passed to init(), and comparing them against the default config. Anything new is updated,
-       otherwise the defaults are used. This allows for the dynamic setting of attributes in one dictionary."""
+    otherwise the defaults are used. This allows for the dynamic setting of attributes in one dictionary."""
     new_config = kwargs
     for key, value in new_config.items():
-        default_config[key] = value  # update the default_config as necessary with new values
+        default_config[
+            key
+        ] = value  # update the default_config as necessary with new values
     return default_config  # while it returns "default_config," it's really returning the modified config.

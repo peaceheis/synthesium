@@ -1,6 +1,6 @@
 import copy
 
-from synthesium.entity.vectorentity import *
+from synthesium.entity.vectorentity import VectorEntity
 from synthesium.mutator.timestamp import TimeStamp
 from synthesium.utils.useful_functions import constant
 
@@ -8,7 +8,9 @@ from synthesium.utils.useful_functions import constant
 class Mutator:
     """Mutators make Entities change, and also return them for Canvas's renderer"""
 
-    def __init__(self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant
+    ):
         self.current_frame = None
         self.should_call_pre_tick = False
         self.target = target
@@ -41,16 +43,22 @@ class Mutator:
         return self.start <= frame <= self.end
 
     def validate_runtimes(self, start: TimeStamp, end: TimeStamp):
-        class InvalidRuntimeError(Exception):  # here in the case an invalid runtime is encountered, i.e, end time < start time.
+        class InvalidRuntimeError(
+            Exception
+        ):  # here in the case an invalid runtime is encountered, i.e, end time < start time.
             def __init__(self):
-                super().__init__(f"Beginning time was set to {start}, \
-                                        but end time was set to {end}")
+                super().__init__(
+                    f"Beginning time was set to {start}, \
+                                        but end time was set to {end}"
+                )
 
         if not start < end:
             raise InvalidRuntimeError()
 
     def copy(self) -> "Mutator":
-        return copy.deepcopy(self)  # allows for creating small variants of a Mutator with method chaining
+        return copy.deepcopy(
+            self
+        )  # allows for creating small variants of a Mutator with method chaining
 
     def __str__(self):
         return f"Mutator of type {type(self)}"

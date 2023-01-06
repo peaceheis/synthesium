@@ -12,7 +12,9 @@ class VectorEntity(Entity):
 
     def __init__(self, *points: Point, **kwargs: "dict[str, Any]"):
         super().__init__()
-        self.points: tuple[Point] = tuple(points)  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
+        self.points: tuple[Point] = tuple(
+            points
+        )  # tuples require less memory space, and points generally shouldn't be changing in terms of length.
         self.config = configure(self.config, **kwargs)
 
     # movement functions

@@ -9,7 +9,9 @@ from synthesium.utils.useful_functions import constant
 
 # TODO sort these into folders
 class Show(Mutator):
-    def __init__(self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self, target: VectorEntity, start: TimeStamp, end: TimeStamp, rate_func=constant
+    ):
         super().__init__(target, start, end, rate_func=rate_func)
 
     def tick(self):
@@ -20,21 +22,38 @@ class Show(Mutator):
 class Move(Mutator):
     """Shifts are done by adding a tuple of length 2, in the form (x movement, y movement). Use negatives for left and down, respectively."""
 
-    def __init__(self, target: VectorEntity, amount: tuple, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        amount: tuple,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.amount = amount
 
     def tick(self):
         super().tick()
         single_frame_amount = [amt / self.total_frames for amt in self.amount]
-        adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in
-                                 single_frame_amount]
+        adjusted_frame_amount = [
+            amt * self.rate_func(self.current_frame, self.total_frames)
+            for amt in single_frame_amount
+        ]
         return self.target.shift(tuple(adjusted_frame_amount))
 
 
 class Rotate(Mutator):
-    def __init__(self, target: VectorEntity, degrees: int, center: Point, start: TimeStamp, end: TimeStamp,
-                 rotates_clockwise=True, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        degrees: int,
+        center: Point,
+        start: TimeStamp,
+        end: TimeStamp,
+        rotates_clockwise=True,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.degrees = degrees
         self.center = center
@@ -42,16 +61,28 @@ class Rotate(Mutator):
 
     def tick(self):
         super().tick()
-        self.target.rotate(self.degrees / self.total_frames * self.rate_func(self.current_frame, self.total_frames),
-                           self.center, rotates_clockwise=self.rotates_clockwise)
+        self.target.rotate(
+            self.degrees
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames),
+            self.center,
+            rotates_clockwise=self.rotates_clockwise,
+        )
         return self.target
 
 
 class MovePoint(Mutator):
     """Shifts are done by adding a tuple of length 2, in the form (x movement, y movement). Use negatives for left and down, respectively."""
 
-    def __init__(self, target: VectorEntity, point_index: int, amount: tuple, start: TimeStamp, end: TimeStamp,
-                 rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        point_index: int,
+        amount: tuple,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.point_index = point_index
         self.amount = amount
@@ -59,22 +90,33 @@ class MovePoint(Mutator):
     def tick(self):
         super().tick
         single_frame_amount = [amt / self.total_frames for amt in self.amount]
-        adjusted_frame_amount = [amt * self.rate_func(self.current_frame, self.total_frames) for amt in
-                                 single_frame_amount]
+        adjusted_frame_amount = [
+            amt * self.rate_func(self.current_frame, self.total_frames)
+            for amt in single_frame_amount
+        ]
         self.target.points[self.point_index].shift(tuple(adjusted_frame_amount))
         return self.target
 
 
 class Transform(Mutator):
-    def __init__(self, target: VectorEntity, attribute: str, end_attribute, start: TimeStamp, end: TimeStamp,
-                 rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        attribute: str,
+        end_attribute,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.attribute = attribute.lower()
         self.end_attribute = end_attribute
         self.start_attribute = getattr(target, attribute)
         self.should_call_pre_tick = True
 
-    def pre_tick(self):  # in order to ensure that the transform acts on the most recent version of the target Entity,
+    def pre_tick(
+        self,
+    ):  # in order to ensure that the transform acts on the most recent version of the target Entity,
         # initialization occurs right before ticking starts. This allows multiple Transforms to target the same Entity
         # as long as they aren't concurrent.
 
@@ -83,7 +125,11 @@ class Transform(Mutator):
 
     def tick(self):
         super().tick()
-        self.target.__setattr__(self.attribute, getattr(self.target,
-                                                        self.attribute) + self.difference / self.total_frames * self.rate_func(
-            self.current_frame, self.total_frames))
+        self.target.__setattr__(
+            self.attribute,
+            getattr(self.target, self.attribute)
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames),
+        )
         return self.target

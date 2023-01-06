@@ -88,7 +88,11 @@ class TimeStamp:
         return self.__lt__(marker)
 
     def __eq__(self, marker: "TimeStamp"):
-        return self.minute == marker.minute and self.second == marker.second and self.frame == marker.frame
+        return (
+            self.minute == marker.minute
+            and self.second == marker.second
+            and self.frame == marker.frame
+        )
 
     def is_equal_to(self, marker: "TimeStamp"):
         return self.__eq__(marker)
@@ -104,6 +108,3 @@ class TimeStamp:
 
     def is_equal_to_or_before(self, marker: "TimeStamp"):
         return self.__le__(marker)
-
-    def __str__(self):
-        return f"{self.__class__.__name__} at min {self.minute}, sec {self.second}, and frame {self.frame}"

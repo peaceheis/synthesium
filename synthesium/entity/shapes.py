@@ -8,18 +8,27 @@ from synthesium.utils.colors import WHITE, PURE_BLUE, HALF_OPAQUE_RED, BLACK
 
 
 class Arc(VectorEntity):
-    def __init__(self, center: Point, radius: int, angle1: int, angle2: int, negative=False, *points: Point, **kwargs):
+    def __init__(
+        self,
+        center: Point,
+        radius: int,
+        angle1: int,
+        angle2: int,
+        negative=False,
+        *points: Point,
+        **kwargs
+    ):
         super().__init__(*points, **kwargs)
         default_config = {
             "color": PURE_BLUE,
             "fill_color": HALF_OPAQUE_RED,
-            "line_width": 10
+            "line_width": 10,
         }
         self.center = center
         self.radius = radius
         self.angle1 = angle1
         self.angle2 = angle2
-        self.points = center,
+        self.points = (center,)
         # for compatability purposes with the rest of the library, which assumes all entities have a tuple attribute called self.points.
         self.negative = negative
         self.config = configure(default_config, **kwargs)
@@ -33,7 +42,7 @@ class Arc(VectorEntity):
 
     def set_center(self, center: Point):
         self.center = center
-        self.points = center,
+        self.points = (center,)
         return self
 
     def get_radius(self):
@@ -129,13 +138,14 @@ class Line(VectorEntity):
 
 
 class Curve(VectorEntity):
-    def __init__(self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point, **kwargs):
-        self.config = {
-            "fill_color": WHITE,
-            "color": BLACK,
-            "line_width": 4
-        }
+    def __init__(
+        self, anchor1: Point, handle1: Point, handle2: Point, anchor2: Point, **kwargs
+    ):
+        self.config = {"fill_color": WHITE, "color": BLACK, "line_width": 4}
         configure(self.config, **kwargs)
         self.points = (
-            anchor1, handle1, handle2,
-            anchor2)  # look into Bézier curves, namely cubic ones, for info on how this works.
+            anchor1,
+            handle1,
+            handle2,
+            anchor2,
+        )  # look into Bézier curves, namely cubic ones, for info on how this works.

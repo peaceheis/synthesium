@@ -20,12 +20,15 @@ class Canvas:
     In addition, animation goes on here, by calling tick() on every active Mutator.
     """
 
-    def __init__(self, /,
-                 path: str,
-                 width: int,
-                 height: int,
-                 fps=DEFAULT_FPS,
-                 background_frame=None) -> None:
+    def __init__(
+        self,
+        /,
+        path: str,
+        width: int,
+        height: int,
+        fps=DEFAULT_FPS,
+        background_frame=None,
+    ) -> None:
         # TODO, make a better default frame size
 
         self.fps = fps
@@ -45,32 +48,46 @@ class Canvas:
         return self.width, self.height
 
     def launch_writing_subprocess(self, end_dir):
-        if not os.path.exists(os.path.split(end_dir)[0]):  # TODO: create directory ourself!
-            raise Exception(f"directory {end_dir} provided to Canvas {self.__class__.__name__} does not exist.")
+        if not os.path.exists(
+            os.path.split(end_dir)[0]
+        ):  # TODO: create directory ourself!
+            raise Exception(
+                f"directory {end_dir} provided to Canvas {self.__class__.__name__} does not exist."
+            )
 
         command = [
             FFMPEG_BIN,
-            '-y',  # overwrite output file if it exists
-            '-f', 'rawvideo',
-            '-s', str(self.width) + 'x' + str(self.height),  # size of one frame
-            '-pix_fmt', 'rgba',
-            '-r', str(self.fps),  # frames per second
-            '-i', '-',  # The input comes from a pipe
-            '-an',  # Tells FFMPEG not to expect any audio
-            '-loglevel', 'error',
-            '-vcodec', 'libx264',
-            '-pix_fmt', 'yuv420p',
+            "-y",  # overwrite output file if it exists
+            "-f",
+            "rawvideo",
+            "-s",
+            str(self.width) + "x" + str(self.height),  # size of one frame
+            "-pix_fmt",
+            "rgba",
+            "-r",
+            str(self.fps),  # frames per second
+            "-i",
+            "-",  # The input comes from a pipe
+            "-an",  # Tells FFMPEG not to expect any audio
+            "-loglevel",
+            "error",
+            "-vcodec",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
         ]
 
         command += [end_dir]
         return subprocess.Popen(command, stdin=subprocess.PIPE)
-        # credit to Manim (https://github.com/3b1b/manim). 
+        # credit to Manim (https://github.com/3b1b/manim).
         # I adapted this code from scene_file_writer.py, in the cairo-backend branch. Brilliant code there.
 
     def save(self, end_dir: str):
         print(f"Starting Write of {self.__class__.__name__}")
         self.process = self.launch_writing_subprocess(end_dir)
-        arr = self.background_frame or np.zeros((self.width, self.height, defaults.DEFAULT_COLOR_DEPTH))
+
+        arr = np.zeros(self.width * self.height, np.uint32)
+        arr = arr.reshape(self.width, self.height)
 
         while self.current_frame < self.end:
             print(f"Processing frame {self.current_frame}")
@@ -87,10 +104,7 @@ class Canvas:
                     for y, arr_y in enumerate(range(y_size)):
                         arr[x + start_x, y + start_y] = render[x, y]
 
-            x = arr.tobytes()
-            self.process.stdin.write(x)
-            ctx = cairo.Context()
-            ctx.
+            self.process.stdin.write(arr.tobytes())
 
         self.process.stdin.close()
         self.process.wait()
@@ -101,5 +115,5 @@ class Canvas:
         self.save(enddir)
 
     def construct(self):
-        """Construct() lies at the heart of Synthesium. All mutators should be played in self.construct(), which the 
+        """Construct() lies at the heart of Synthesium. All mutators should be played in self.construct(), which the
         internal pipeline looks for when creating an animation. This idea from this comes from 3b1b's Manim. Check it out at https://github.com/3b1b/manim"""

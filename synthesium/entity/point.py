@@ -17,19 +17,21 @@ class Point:
 
         self.x = ox + cos(radians) * (x - ox) + sin(radians) * (y - oy)
         self.y = oy + -sin(radians) * (x - ox) + cos(radians) * (y - oy)
-        # this was adapted from https://gist.github.com/LyleScott/e36e08bfb23b1f87af68c9051f985302, 
+        # this was adapted from https://gist.github.com/LyleScott/e36e08bfb23b1f87af68c9051f985302,
         # which links to LyleScott's rotate_2d_point.py
         return self
 
     def as_polar_tuple(self):
         """Returns a tuple representing the Point in polar coordinates. Note: returns angle in radians."""
-        radius = sqrt(self.x ** 2 + self.y ** 2)
+        radius = sqrt(self.x**2 + self.y**2)
 
         x_sign = self.x < 0
         y_sign = -self.x < 0
 
         match (
-        x_sign, y_sign):  # matching the sign to the correct theta, as atan only returns values between -pi/2 and pi/2
+            x_sign,
+            y_sign,
+        ):  # matching the sign to the correct theta, as atan only returns values between -pi/2 and pi/2
             case (True, True):
                 angle = atan(self.y / self.x)
             case (False, True):

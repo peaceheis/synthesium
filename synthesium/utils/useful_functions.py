@@ -12,8 +12,12 @@ def linear_decrease(current_frame, total_frames):
 
 
 def there_and_back(current_frame, total_frames):
-    if current_frame / total_frames < .5:
+    if current_frame / total_frames < 0.5:
         return linear_increase(current_frame, total_frames)
 
-    if current_frame / total_frames >= .5:
+    if current_frame / total_frames >= 0.5:
         return linear_decrease(current_frame, total_frames)
+
+
+def pack_rgba(red: int, green: int, blue: int, alpha: int):
+    return (red << 24) | (green << 16) | (blue << 8) | alpha

@@ -5,7 +5,14 @@ from synthesium.utils.useful_functions import constant
 
 
 class ChangeOpacity(Mutator):
-    def __init__(self, target: VectorEntity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        opacity: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -19,13 +26,23 @@ class ChangeOpacity(Mutator):
 
     def tick(self):
         self.target.set_opacity(
-            self.start_opacity + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                      self.total_frames))
+            self.start_opacity
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeOpacityFill(Mutator):
-    def __init__(self, target: VectorEntity, opacity: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        opacity: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_opacity = None
@@ -39,13 +56,23 @@ class ChangeOpacityFill(Mutator):
 
     def tick(self):
         self.target.set_opacity_fill(
-            self.target.get_opacity() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                             self.total_frames))
+            self.target.get_opacity()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeRed(Mutator):
-    def __init__(self, target: VectorEntity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        red_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_red = None
@@ -59,13 +86,23 @@ class ChangeRed(Mutator):
 
     def tick(self):
         self.target.set_red(
-            self.target.get_red() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                         self.total_frames))
+            self.target.get_red()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeRedFill(Mutator):
-    def __init__(self, target: VectorEntity, red_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        red_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.start_red = None
         self.difference = None
@@ -79,13 +116,23 @@ class ChangeRedFill(Mutator):
 
     def tick(self):
         self.target.set_red_fill(
-            self.target.get_red_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                              self.total_frames))
+            self.target.get_red_fill()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeGreen(Mutator):
-    def __init__(self, target: VectorEntity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        green_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -99,13 +146,23 @@ class ChangeGreen(Mutator):
 
     def tick(self):
         self.target.set_green(
-            self.target.get_green() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                           self.total_frames))
+            self.target.get_green()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeGreenFill(Mutator):
-    def __init__(self, target: VectorEntity, green_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        green_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_green = None
@@ -119,13 +176,23 @@ class ChangeGreenFill(Mutator):
 
     def tick(self):
         self.target.set_green_fill(
-            self.target.get_green_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                                self.total_frames))
+            self.target.get_green_fill()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeBlue(Mutator):
-    def __init__(self, target: VectorEntity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        blue_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None
@@ -139,13 +206,23 @@ class ChangeBlue(Mutator):
 
     def tick(self):
         self.target.set_blue(
-            self.target.get_blue() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                          self.total_frames))
+            self.target.get_blue()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
 
 
 class ChangeBlueFill(Mutator):
-    def __init__(self, target: VectorEntity, blue_val: float, start: TimeStamp, end: TimeStamp, rate_func=constant):
+    def __init__(
+        self,
+        target: VectorEntity,
+        blue_val: float,
+        start: TimeStamp,
+        end: TimeStamp,
+        rate_func=constant,
+    ):
         super().__init__(target, start, end, rate_func)
         self.difference = None
         self.start_blue = None
@@ -159,6 +236,9 @@ class ChangeBlueFill(Mutator):
 
     def tick(self):
         self.target.set_blue_fill(
-            self.target.get_blue_fill() + self.difference / self.total_frames * self.rate_func(self.current_frame,
-                                                                                               self.total_frames))
+            self.target.get_blue_fill()
+            + self.difference
+            / self.total_frames
+            * self.rate_func(self.current_frame, self.total_frames)
+        )
         return self.target
