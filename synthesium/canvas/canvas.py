@@ -1,6 +1,7 @@
 import os
 import os.path
 import subprocess
+from abc import ABC
 
 import cairo
 import numpy as np
@@ -12,7 +13,7 @@ from synthesium.utils import defaults
 from synthesium.utils.defaults import DEFAULT_FPS, FFMPEG_BIN
 
 
-class Canvas:
+class Canvas(ABC):
     """The canvas acts as the entry point between the user and Synthesium. The user creates a class that inherits
     from Canvas, and overrides construct. They then must instantiate their custom class, and
     run save("end_directory"), which returns the finished video. All the rendering gets done after that method is called,
